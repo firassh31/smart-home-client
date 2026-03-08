@@ -12,7 +12,7 @@ let devices = [];
 let activeRoom = 'All';
 let activeControlDevice = null;
 
-/* ── DOM Cache ─────────────────────────────────── */
+/* DOM Cache ───*/
 const el = {
     deviceList: document.getElementById('deviceList'),
     roomNav: document.getElementById('room-nav'),
@@ -40,15 +40,11 @@ const el = {
     toastContainer: document.getElementById('toast-container'),
 };
 
-/* ── Helpers ───────────────────────────────────── */
+/* Helpers ─────*/
 const getIcon = type => ({ light: '💡', ac: '❄️', doorlock: '🔒' }[type] || '🔌');
 
-const debounce = (fn, ms) => {
-    let t;
-    return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
-};
 
-/* ── Toast ─────────────────────────────────────── */
+/* Toast ───────*/
 const showToast = (msg, type = 'success') => {
     const t = document.createElement('div');
     t.className = `toast ${type}`;
@@ -57,11 +53,11 @@ const showToast = (msg, type = 'success') => {
     setTimeout(() => t.remove(), 3100);
 };
 
-/* ── Modal helpers (CSS class, not display toggle) */
+/* Modal helpers (CSS class, not display toggle) */
 const openModal = id => document.getElementById(id).classList.add('is-open');
 const closeModal_ = id => document.getElementById(id).classList.remove('is-open');
 
-/* ── Fetch & full render ───────────────────────── */
+/* Fetch & full render */
 const loadDevices = async () => {
     try {
         const res = await fetch(API_URL);
@@ -73,9 +69,12 @@ const loadDevices = async () => {
     }
 };
 
-/* ── Render (pure DOM update, no fetch) ─────────── */
+/* Render (pure DOM update, no fetch) */
 const renderUI = () => {
     const rooms = ['All', ...new Set(devices.map(d => d.room || 'Unassigned'))];
+    if (!rooms.includes(activeRoom)) {
+        activeRoom = 'All';
+    }
     const filtered = activeRoom === 'All'
         ? devices
         : devices.filter(d => (d.room || 'Unassigned') === activeRoom);
@@ -134,7 +133,7 @@ const renderUI = () => {
     }).join('');
 };
 
-/* ── Optimistic toggle (instant UI, background save) */
+/* Optimistic toggle (instant UI, background save) */
 const toggleDevice = async (id, currentStatus) => {
     const newStatus = currentStatus === 'on' ? 'off' : 'on';
 
@@ -179,7 +178,7 @@ const toggleDevice = async (id, currentStatus) => {
     }
 };
 
-/* ── Save Device (Add / Edit) ───────────────────── */
+/* Save Device (Add / Edit) */
 const saveDevice = async () => {
     const id = el.editingId.value.trim();
     const name = el.deviceName.value.trim();
@@ -206,7 +205,7 @@ const saveDevice = async () => {
     }
 };
 
-/* ── Delete Device ──────────────────────────────── */
+/* Delete Device */
 const confirmDelete = async () => {
     const btn = document.querySelector('#deleteModal .danger-btn');
     if (btn.disabled) return;
@@ -227,7 +226,7 @@ const confirmDelete = async () => {
     }
 };
 
-/* ── Modal open/close ───────────────────────────── */
+/* Modal open/close ────────*/
 const openDeleteModal = id => {
     el.deleteIdField.value = id;
     openModal('deleteModal');
@@ -261,18 +260,18 @@ const editDevice = id => {
     setTimeout(() => el.deviceName.focus(), 80);
 };
 
-/* ── Sidebar ────────────────────────────────────── */
+/*  Sidebar */
 const toggleSidebar = () => {
     el.sidebar.classList.toggle('show');
     el.sidebarOverlay.classList.toggle('show');
 };
 
-/* ── Dropdowns ──────────────────────────────────── */
+/*  Dropdowns  */
 const closeAllDropdowns = () =>
     document.querySelectorAll('.device-card-dropdown.show')
         .forEach(m => m.classList.remove('show'));
 
-/* ── Device Control Panel ───────────────────────── */
+/*  Device Control Panel  */
 const updateSliderFill = slider => {
     const pct = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
     slider.style.setProperty('--value', pct + '%');
@@ -281,12 +280,17 @@ const updateSliderFill = slider => {
 const openDeviceControl = id => {
     const d = devices.find(d => d.id === id);
     if (!d) return;
+    // UI/UX UPGRADE: Block opening if device is OFF (except doorlocks)
+    if (d.type !== 'doorlock' && d.status === 'off') {
+        showToast('Please turn the device ON to access its settings', 'info');
+        return; // This stops the rest of the function from running!
+    }
     activeControlDevice = d;
 
     el.controlName.textContent = d.name;
 
     if (d.type === 'light') {
-        el.brightnessSlider.value = d.brightness || 100;
+        el.brightnessSlider.value = d.brightness || 10;
         el.brightnessDisplay.textContent = el.brightnessSlider.value;
         updateSliderFill(el.brightnessSlider);
     } else if (d.type === 'ac') {
@@ -297,7 +301,7 @@ const openDeviceControl = id => {
 
         // Update the text
         el.unlockBtn.textContent = isLocked ? 'Unlock Door' : 'Lock Door';
-
+        const panelFooter = document.querySelector('.panel-footer');
         if (isLocked) {
             el.unlockBtn.classList.remove('danger-btn');
             el.unlockBtn.classList.add('btn-on'); // Safe = Green
@@ -310,8 +314,16 @@ const openDeviceControl = id => {
     document.querySelectorAll('.device-panel').forEach(p => p.classList.add('hidden'));
     const panel = document.getElementById(`panel-${d.type}`) || document.getElementById('panel-unknown');
     panel.classList.remove('hidden');
+    // Hide the Save button footer if it's a doorlock, show it for everything else
+    const panelFooter = document.querySelector('.panel-footer');
+    if (d.type === 'doorlock' || d.type === 'unknown') {
+        panelFooter.classList.add('hidden');
+    } else {
+        panelFooter.classList.remove('hidden');
+    }
 
     el.controlPanel.classList.add('active');
+
 };
 
 const closeDeviceControl = () => {
@@ -319,7 +331,7 @@ const closeDeviceControl = () => {
     activeControlDevice = null;
 };
 
-/* ── State update (debounced for sliders/temp) ───── */
+/* State update (debounced for sliders/temp) ───*/
 const updateDeviceState = async stateUpdates => {
     if (!activeControlDevice) return;
     try {
@@ -338,37 +350,42 @@ const updateDeviceState = async stateUpdates => {
     }
 };
 
-const debouncedUpdate = debounce(updateDeviceState, 4000);
 
 const savePanelSettings = () => {
-    const savePanelSettings = () => {
-        if (!activeControlDevice) return;
+    if (!activeControlDevice) return;
 
-        if (activeControlDevice.type === 'light') {
-            updateDeviceState({ brightness: parseInt(el.brightnessSlider.value) });
-            showToast('Brightness saved!', 'success');
-        } else if (activeControlDevice.type === 'ac') {
-            updateDeviceState({ temperature: parseInt(el.tempDisplay.textContent) });
-            showToast('Temperature saved!', 'success');
-        } else if (activeControlDevice.type === 'doorlock') {
-            // Fallback just in case they click the green save button!
-            showToast('Security settings updated.', 'info');
-            closeDeviceControl();
-        }
-    };
+    if (activeControlDevice.type === 'light') {
+        updateDeviceState({ brightness: parseInt(el.brightnessSlider.value) });
+        showToast('Brightness saved!', 'success');
+        closeDeviceControl();
+    } else if (activeControlDevice.type === 'ac') {
+        updateDeviceState({ temperature: parseInt(el.tempDisplay.textContent) });
+        showToast('Temperature saved!', 'success');
+        closeDeviceControl();
+    }
 };
 
-/* ═══════════════════════════════════════════════
+
+/* 
    SINGLE DELEGATED EVENT LISTENER SETUP
    All clicks handled via event delegation on
    document — no inline onclick needed (except
    modal buttons which stay inline for simplicity).
-═══════════════════════════════════════════════ */
+*/
 const setupListeners = () => {
 
-    /* ── Global click delegation ── */
+    /* Global click delegation */
     document.addEventListener('click', e => {
         const t = e.target;
+        /* 
+    Room filter click 
+    */
+        const roomBtn = t.closest('[data-room]');
+        if (roomBtn) {
+            activeRoom = roomBtn.dataset.room; // Update the active room state
+            renderUI();                        // Re-render the grid and active state
+            return;
+        }
         /* Three-dot menu toggle */
         const menuBtn = t.closest('[data-menu]');
         if (menuBtn) {
@@ -408,37 +425,58 @@ const setupListeners = () => {
         if (!t.closest('.device-card-menu')) closeAllDropdowns();
     });
 
-    /* ── Brightness slider ── */
+    /*  Brightness slider */
     el.brightnessSlider.addEventListener('input', e => {
         el.brightnessDisplay.textContent = e.target.value;
         updateSliderFill(e.target);
-        debouncedUpdate({ brightness: parseInt(e.target.value) });
     });
 
-    /* ── AC temp buttons ── */
+    /*  AC temp buttons  */
     document.getElementById('temp-minus').addEventListener('click', () => adjustTemp(-1));
     document.getElementById('temp-plus').addEventListener('click', () => adjustTemp(+1));
 
-    /* ── Door lock ── */
+    /* Door lock */
     document.getElementById('unlock-btn').addEventListener('click', (e) => {
         if (!activeControlDevice) return;
+
         const isCurrentlyLocked = activeControlDevice.is_locked !== false;
         const newLockedState = !isCurrentlyLocked;
+        const newStatus = newLockedState ? 'on' : 'off';
+
+        // Update local state
         activeControlDevice.is_locked = newLockedState;
+        activeControlDevice.status = newStatus;
+
+        // Update panel button UI
         const btn = e.target;
         btn.textContent = newLockedState ? 'Unlock Door' : 'Lock Door';
         if (newLockedState) {
             btn.classList.remove('danger-btn');
-            btn.classList.add('btn-on'); // Turns Green
+            btn.classList.add('btn-on'); // Green
         } else {
             btn.classList.remove('btn-on');
-            btn.classList.add('danger-btn'); // Turns Red
+            btn.classList.add('danger-btn'); // Red
         }
-        updateDeviceState({ is_locked: newLockedState });
+
+        // Updates dashboard card toggle UI
+        const cardToggleBtn = document.querySelector(`[data-toggle="${activeControlDevice.id}"]`);
+        if (cardToggleBtn) {
+            cardToggleBtn.classList.toggle('btn-on', newLockedState);
+            cardToggleBtn.classList.toggle('btn-off', !newLockedState);
+            cardToggleBtn.textContent = newLockedState ? 'ON' : 'OFF';
+            cardToggleBtn.dataset.status = newStatus;
+        }
+
+        // Sends BOTH updates to the database!
+        updateDeviceState({
+            is_locked: newLockedState,
+            status: newStatus
+        });
+
         showToast(newLockedState ? 'Door Locked 🔒' : 'Door Unlocked 🔓', 'info');
     });
 
-    /* ── Keyboard: Escape closes modals/panel ── */
+    /*  Keyboard: Escape closes modals/panel */
     document.addEventListener('keydown', e => {
         if (e.key !== 'Escape') return;
         if (el.addModal.classList.contains('is-open')) closeAddModal();
@@ -446,7 +484,7 @@ const setupListeners = () => {
         if (el.controlPanel.classList.contains('active')) closeDeviceControl();
     });
 
-    /* ── Keyboard: Enter submits add modal ── */
+    /* Keyboard: Enter submits add modal */
     [el.deviceName, el.deviceRoom].forEach(inp =>
         inp.addEventListener('keydown', e => { if (e.key === 'Enter') saveDevice(); })
     );
@@ -457,10 +495,9 @@ const adjustTemp = delta => {
     let temp = parseInt(el.tempDisplay.textContent) + delta;
     temp = Math.max(16, Math.min(30, temp));
     el.tempDisplay.textContent = temp + '°C';
-    debouncedUpdate({ temperature: temp });
 };
 
-/* ── Expose globals used by inline onclick attributes ── */
+/*  Expose globals used by inline onclick attributes */
 window.saveDevice = saveDevice;
 window.confirmDelete = confirmDelete;
 window.openAddModal = openAddModal;
@@ -473,7 +510,7 @@ window.profile = () => { };
 window.settings = () => { };
 window.logout = () => { };
 
-/* ── Init ── */
+/* Init */
 window.addEventListener('DOMContentLoaded', () => {
     setupListeners();
     loadDevices();

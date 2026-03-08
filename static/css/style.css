@@ -1,6 +1,4 @@
-/* ═══════════════════════════════════════════
-   FONTS
-═══════════════════════════════════════════ */
+/* FONTS */
 @font-face {
     font-family: 'Inter';
     src: url('../fonts/Inter_18pt-Regular.ttf') format('truetype');
@@ -15,9 +13,7 @@
     font-style: normal;
 }
 
-/* ═══════════════════════════════════════════
-   DESIGN TOKENS
-═══════════════════════════════════════════ */
+/* DESIGN TOKENS */
 :root {
     --bg-main: #FFFFFF;
     --bg-page: #F4F2EF;
@@ -54,9 +50,7 @@
     --navbar-h: 64px;
 }
 
-/* ═══════════════════════════════════════════
-   RESET
-═══════════════════════════════════════════ */
+/* RESET */
 *,
 *::before,
 *::after {
@@ -94,9 +88,7 @@ a {
     text-decoration: none;
 }
 
-/* ═══════════════════════════════════════════
-   RESPONSIVE HELPERS
-═══════════════════════════════════════════ */
+/* RESPONSIVE HELPERS */
 .mobile-only {
     display: flex !important;
 }
@@ -115,9 +107,7 @@ a {
     }
 }
 
-/* ═══════════════════════════════════════════
-   DESKTOP NAVBAR
-═══════════════════════════════════════════ */
+/* DESKTOP NAVBAR */
 .desktop-navbar {
     display: none;
     position: fixed;
@@ -154,6 +144,7 @@ a {
     align-items: center;
     gap: var(--sp-sm);
     flex-shrink: 0;
+    -webkit-user-select: none;
     user-select: none;
 }
 
@@ -184,6 +175,10 @@ a {
     display: flex;
     align-items: center;
     gap: 4px;
+    /* Disable text selection across all browsers (Safari, Firefox, IE/Edge, Standard) */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
 }
 
@@ -214,6 +209,10 @@ a {
     align-items: center;
     gap: var(--sp-md);
     flex-shrink: 0;
+    /* Disable text selection across all browsers (Safari, Firefox, IE/Edge, Standard) */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
 }
 
@@ -232,13 +231,15 @@ a {
     background: rgba(166, 79, 60, 0.05);
 }
 
-/* ═══════════════════════════════════════════
-   DESKTOP HERO STRIP
-═══════════════════════════════════════════ */
+/* DESKTOP HERO STRIP */
 .desktop-hero {
     background: linear-gradient(135deg, var(--accent-on) 0%, #4E6310 100%);
     padding: var(--sp-xl) 0;
     margin-top: var(--navbar-h);
+    /* Disable text selection across all browsers (Safari, Firefox, IE/Edge, Standard) */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
 }
 
@@ -310,6 +311,10 @@ a {
     transition: filter var(--ease-fast), transform var(--ease-fast);
     box-shadow: var(--shadow-sm);
     white-space: nowrap;
+    /* Disable text selection across all browsers (Safari, Firefox, IE/Edge, Standard) */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
 }
 
@@ -322,9 +327,7 @@ a {
     transform: scale(0.97);
 }
 
-/* ═══════════════════════════════════════════
-   APP SHELL
-═══════════════════════════════════════════ */
+/* APP SHELL */
 .app-shell {
     max-width: 480px;
     margin: 0 auto;
@@ -338,9 +341,7 @@ a {
     }
 }
 
-/* ═══════════════════════════════════════════
-   MOBILE HEADER
-═══════════════════════════════════════════ */
+/* MOBILE HEADER */
 .main-header {
     position: sticky;
     top: 0;
@@ -348,6 +349,10 @@ a {
     background: #fff;
     border-bottom: 1px solid rgba(0, 0, 0, 0.07);
     padding: 14px var(--sp-lg);
+    /* Disable text selection across all browsers (Safari, Firefox, IE/Edge, Standard) */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
 }
 
@@ -407,6 +412,10 @@ a {
     font: 700 0.76rem var(--font-base);
     white-space: nowrap;
     box-shadow: 0 2px 8px rgba(52, 64, 10, 0.22);
+    /* Disable text selection across all browsers (Safari, Firefox, IE/Edge, Standard) */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
 }
 
@@ -431,9 +440,7 @@ a {
     }
 }
 
-/* ═══════════════════════════════════════════
-   CONTENT WRAPPER
-═══════════════════════════════════════════ */
+/* CONTENT WRAPPER */
 .content-wrapper {
     padding: var(--sp-lg) var(--sp-lg) 110px;
 }
@@ -463,12 +470,14 @@ a {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.08em;
+    /* Disable text selection across all browsers (Safari, Firefox, IE/Edge, Standard) */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
 }
 
-/* ═══════════════════════════════════════════
-   ROOM NAV PILLS
-═══════════════════════════════════════════ */
+/* ROOM NAV PILLS */
 .room-nav-container {
     display: flex;
     gap: 10px;
@@ -495,6 +504,10 @@ a {
     transition: all var(--ease-fast);
     box-shadow: var(--shadow-sm);
     flex-shrink: 0;
+    /* Disable text selection across all browsers (Safari, Firefox, IE/Edge, Standard) */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
 }
@@ -511,10 +524,10 @@ a {
     box-shadow: 0 4px 12px rgba(107, 176, 191, 0.35);
 }
 
-/* ═══════════════════════════════════════════
+/* 
    DEVICE GRID
    Mobile: 2 cols | Desktop: 4 cols
-═══════════════════════════════════════════ */
+*/
 .device-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -528,9 +541,7 @@ a {
     }
 }
 
-/* ═══════════════════════════════════════════
-   DEVICE CARD
-═══════════════════════════════════════════ */
+/* DEVICE CARD */
 .device-card {
     background: var(--card-surface);
     border-radius: var(--br-lg);
@@ -544,6 +555,10 @@ a {
     cursor: pointer;
     transition: transform var(--ease-fast), box-shadow var(--ease-fast);
     overflow: hidden;
+    /* Disable text selection across all browsers (Safari, Firefox, IE/Edge, Standard) */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
 }
@@ -604,9 +619,7 @@ a {
     margin-top: auto;
 }
 
-/* ═══════════════════════════════════════════
-   THREE-DOT MENU
-═══════════════════════════════════════════ */
+/* THREE-DOT MENU */
 .device-card-menu {
     position: absolute;
     top: 12px;
@@ -670,9 +683,7 @@ a {
     border-top: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-/* ═══════════════════════════════════════════
-   TOGGLE BUTTON
-═══════════════════════════════════════════ */
+/* TOGGLE BUTTON */
 .toggle-btn {
     position: relative;
     width: 52px;
@@ -712,9 +723,7 @@ a {
     background: var(--alert-off);
 }
 
-/* ═══════════════════════════════════════════
-   MOBILE FAB
-═══════════════════════════════════════════ */
+/* MOBILE FAB */
 .fab-btn {
     position: fixed;
     bottom: 28px;
@@ -732,6 +741,10 @@ a {
     box-shadow: var(--shadow-float);
     transition: transform var(--ease-fast);
     z-index: 200;
+    /* Disable text selection across all browsers (Safari, Firefox, IE/Edge, Standard) */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
 }
@@ -744,9 +757,7 @@ a {
     transform: scale(0.94);
 }
 
-/* ═══════════════════════════════════════════
-   MOBILE SIDEBAR & OVERLAY
-═══════════════════════════════════════════ */
+/* MOBILE SIDEBAR & OVERLAY */
 #sidebar-overlay {
     position: fixed;
     inset: 0;
@@ -865,12 +876,12 @@ a {
     padding-top: var(--sp-md);
 }
 
-/* ═══════════════════════════════════════════
+/* 
    MODALS
    Key fix: use display:flex for centering,
    hide via visibility+opacity not display:none,
    so inputs always live in the DOM and stay focusable.
-═══════════════════════════════════════════ */
+ */
 .modal {
     position: fixed;
     inset: 0;
@@ -947,10 +958,10 @@ a {
     letter-spacing: 0.05em;
 }
 
-/* ── Inputs & Selects ──
+/*  Inputs & Selects 
    CRITICAL: user-select:auto so text can be typed/selected.
    No pointer-events restrictions inside modals.
-────────────────────── */
+ */
 input[type="text"],
 select {
     width: 100%;
@@ -980,9 +991,7 @@ select:focus {
     margin-top: var(--sp-lg);
 }
 
-/* ═══════════════════════════════════════════
-   BUTTONS
-═══════════════════════════════════════════ */
+/* BUTTONS*/
 .primary-btn,
 .secondary-btn {
     flex: 1;
@@ -990,6 +999,10 @@ select:focus {
     border-radius: var(--br-md);
     font: 700 0.92rem var(--font-heading);
     transition: all var(--ease-fast);
+    /* Disable text selection across all browsers (Safari, Firefox, IE/Edge, Standard) */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
 }
@@ -1037,11 +1050,11 @@ select:focus {
     flex: none;
 }
 
-/* ═══════════════════════════════════════════
+/* 
    DEVICE CONTROL PANEL
    Mobile: full-screen slide-up
    Desktop: centred modal sheet (480px wide)
-═══════════════════════════════════════════ */
+*/
 .slide-up-panel {
     position: fixed;
     inset: 0;
@@ -1138,6 +1151,10 @@ select:focus {
     font: 700 0.92rem var(--font-heading);
     padding: 8px 0;
     transition: opacity var(--ease-fast);
+    /* Disable text selection across all browsers (Safari, Firefox, IE/Edge, Standard) */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
 }
 
@@ -1163,7 +1180,7 @@ select:focus {
     }
 }
 
-/* ── Settings Groups ── */
+/*  Settings Groups  */
 .settings-group {
     background: #fff;
     border-radius: var(--br-lg);
@@ -1214,6 +1231,10 @@ select:focus {
     cursor: pointer;
     /* sliders must be interactive */
     pointer-events: auto !important;
+    /* Disable text selection across all browsers (Safari, Firefox, IE/Edge, Standard) */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
 }
 
@@ -1254,6 +1275,10 @@ select:focus {
     font-family: var(--font-heading);
     margin: 0;
     color: var(--accent-secondary);
+    /* Disable text selection across all browsers (Safari, Firefox, IE/Edge, Standard) */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
 }
 
@@ -1270,6 +1295,10 @@ select:focus {
     flex: none;
     color: var(--text-primary) !important;
     transition: all var(--ease-fast);
+    /* Disable text selection across all browsers (Safari, Firefox, IE/Edge, Standard) */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
 }
@@ -1312,9 +1341,7 @@ select:focus {
     padding: 11px var(--sp-xl);
 }
 
-/* ═══════════════════════════════════════════
-   TOASTS
-═══════════════════════════════════════════ */
+/* TOASTS */
 #toast-container {
     position: fixed;
     top: 16px;
@@ -1350,9 +1377,7 @@ select:focus {
     background: var(--text-secondary);
 }
 
-/* ═══════════════════════════════════════════
-   EMPTY / LOADING STATES
-═══════════════════════════════════════════ */
+/* EMPTY / LOADING STATES */
 .empty-state {
     display: flex;
     flex-direction: column;
@@ -1361,6 +1386,10 @@ select:focus {
     color: var(--text-secondary);
     text-align: center;
     gap: var(--sp-md);
+    /* Disable text selection across all browsers (Safari, Firefox, IE/Edge, Standard) */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
 }
 
@@ -1387,9 +1416,7 @@ select:focus {
     animation: spin 0.7s linear infinite;
 }
 
-/* ═══════════════════════════════════════════
-   UTILITIES
-═══════════════════════════════════════════ */
+/* UTILITIES */
 .hidden {
     display: none !important;
 }
@@ -1400,9 +1427,7 @@ select:focus {
     filter: grayscale(1);
 }
 
-/* ═══════════════════════════════════════════
-   KEYFRAMES
-═══════════════════════════════════════════ */
+/* KEYFRAMES */
 @keyframes spin {
     to {
         transform: rotate(360deg);

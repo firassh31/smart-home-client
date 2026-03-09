@@ -36,7 +36,7 @@ It heavily leverages Object-Oriented Programming (OOP) principles and structural
 ### 2. Installation & Setup
 Clone the repository and navigate into the project folder:
 ```bash
-git clone <your-repository-url>
+git clone <https://github.com/firassh31/Smart_home_api>
 cd Smart_home_api
 ```
 ### 3. Environment Variables (Important!)

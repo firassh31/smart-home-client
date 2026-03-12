@@ -924,11 +924,6 @@ a {
     transform: scale(1) translateY(0);
 }
 
-.modal-icon {
-    font-size: 2rem;
-    margin-bottom: var(--sp-sm);
-}
-
 .modal-content h3 {
     font-size: 1.15rem;
     margin-bottom: var(--sp-xs);
@@ -1194,10 +1189,6 @@ select:focus {
     align-items: center;
     gap: var(--sp-sm);
     margin-bottom: var(--sp-lg);
-}
-
-.settings-group-icon {
-    font-size: 1.5rem;
 }
 
 .settings-group h3 {

@@ -113,8 +113,8 @@ const renderUI = () => {
             <div class="device-card-menu">
                 <button class="device-card-menu-btn" data-menu="${d.id}">⋮</button>
                 <div id="device-menu-${d.id}" class="device-card-dropdown">
-                    <button data-edit="${d.id}">✏️ Edit</button>
-                    <button class="delete-text" data-delete="${d.id}">🗑️ Delete</button>
+                    <button data-edit="${d.id}">Edit</button>
+                    <button class="delete-text" data-delete="${d.id}">Delete</button>
                 </div>
             </div>
             <div class="device-info" data-open="${d.id}">

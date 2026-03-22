@@ -7,7 +7,7 @@
    • DOM cache for frequently accessed elements
 ═══════════════════════════════════════════════════ */
 
-const API_URL = '/devices/';
+const API_URL = '/devices';
 let devices = [];
 let activeRoom = 'All';
 let activeControlDevice = null;
@@ -159,7 +159,7 @@ const toggleDevice = async (id, currentStatus) => {
 
     /* Background API call */
     try {
-        const res = await fetch(`${API_URL}${id}/status`, {
+        const res = await fetch(API_URL + '/' + id + '/status', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ status: newStatus })
@@ -188,7 +188,7 @@ const saveDevice = async () => {
     if (!name || !room) return showToast('Please enter both fields', 'error');
 
     const method = id ? 'PUT' : 'POST';
-    const url = id ? `${API_URL}${id}` : API_URL;
+    const url = id ? API_URL + '/' + id : API_URL;
 
     try {
         const res = await fetch(url, {
@@ -213,7 +213,7 @@ const confirmDelete = async () => {
     btn.textContent = 'Deleting…';
 
     try {
-        const res = await fetch(API_URL + el.deleteIdField.value, { method: 'DELETE' });
+        const res = await fetch(API_URL + '/' + el.deleteIdField.value, { method: 'DELETE' });
         if (!res.ok) throw new Error();
         closeModal();
         await loadDevices();
@@ -290,14 +290,14 @@ const openDeviceControl = id => {
     el.controlName.textContent = d.name;
 
     if (d.type === 'light') {
-        el.brightnessSlider.value = d.brightness || 10;
+        el.brightnessSlider.value = d.state?.brightness || 10;
         el.brightnessDisplay.textContent = el.brightnessSlider.value;
         updateSliderFill(el.brightnessSlider);
     } else if (d.type === 'ac') {
-        el.tempDisplay.textContent = (d.temperature || 22) + '°C';
+        el.tempDisplay.textContent = (d.state?.temperature || 22) + '°C';
     } else if (d.type === 'doorlock') {
         // Assume true (locked) if it's a new device without data
-        const isLocked = d.is_locked !== false;
+        const isLocked = d.state?.is_locked !== false;
 
         // Update the text
         el.unlockBtn.textContent = isLocked ? 'Unlock Door' : 'Lock Door';
@@ -316,7 +316,7 @@ const openDeviceControl = id => {
     panel.classList.remove('hidden');
     // Hide the Save button footer if it's a doorlock, show it for everything else
     const panelFooter = document.querySelector('.panel-footer');
-    if (d.type === 'doorlock' || d.type === 'unknown') {
+    if (d.type === 'doorlock') {
         panelFooter.classList.add('hidden');
     } else {
         panelFooter.classList.remove('hidden');
@@ -335,7 +335,7 @@ const closeDeviceControl = () => {
 const updateDeviceState = async stateUpdates => {
     if (!activeControlDevice) return;
     try {
-        const res = await fetch(`${API_URL}${activeControlDevice.id}/state`, {
+        const res = await fetch(API_URL + '/' + activeControlDevice.id + '/state', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(stateUpdates)
@@ -439,12 +439,12 @@ const setupListeners = () => {
     document.getElementById('unlock-btn').addEventListener('click', (e) => {
         if (!activeControlDevice) return;
 
-        const isCurrentlyLocked = activeControlDevice.is_locked !== false;
+        const isCurrentlyLocked = activeControlDevice.state?.is_locked !== false;
         const newLockedState = !isCurrentlyLocked;
         const newStatus = newLockedState ? 'on' : 'off';
 
         // Update local state
-        activeControlDevice.is_locked = newLockedState;
+        activeControlDevice.state.is_locked = newLockedState;
         activeControlDevice.status = newStatus;
 
         // Update panel button UI

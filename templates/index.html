@@ -175,7 +175,9 @@
             <div class="panel-header">
                 <button class="back-btn" onclick="closeDeviceControl()">← Back</button>
                 <h2 id="control-device-name">Device</h2>
-                <div class="header-spacer"></div>
+            </div>
+            <div class="panel-header-actions">
+                <button id="panel-status-toggle" class="toggle-btn btn-off" type="button">OFF</button>
             </div>
             <div class="panel-content">
 
@@ -190,6 +192,12 @@
                         <input type="range" min="1" max="100" value="100" class="full-width-slider"
                             id="brightness-slider" title="Brightness level">
                         <div class="slider-labels"><span>Dim</span><span>Bright</span></div>
+                        <div class="preset-container">
+                            <button type="button" class="preset-btn" data-val="25">25%</button>
+                            <button type="button" class="preset-btn" data-val="50">50%</button>
+                            <button type="button" class="preset-btn" data-val="75">75%</button>
+                            <button type="button" class="preset-btn" data-val="100">100%</button>
+                        </div>
                     </div>
                 </div>
 
@@ -198,12 +206,18 @@
                         <div class="settings-group-header">
                             <h3>Temperature</h3>
                         </div>
-                        <div class="temp-control-wrapper">
-                            <button class="temp-btn" id="temp-minus">−</button>
-                            <h2 class="temp-display">22°C</h2>
-                            <button class="temp-btn" id="temp-plus">+</button>
+                        <div class="ac-dial-wrap">
+                            <span class="ac-range-label ac-range-label-left">16°C</span>
+                            <span class="ac-range-label ac-range-label-right">30°C</span>
+                            <div class="ac-dial" id="ac-dial" aria-label="AC temperature dial">
+                                <div class="ac-dial-ticks" id="ac-dial-ticks"></div>
+                                <div class="ac-dial-center">
+                                    <span class="temp-display">22</span><sup>°C</sup>
+                                </div>
+                                <button type="button" class="ac-dial-knob" id="ac-dial-knob"
+                                    aria-label="Adjust temperature"></button>
+                            </div>
                         </div>
-                        <p class="temp-range-hint">Range: 16°C – 30°C</p>
                     </div>
                 </div>
 
@@ -229,7 +243,7 @@
             <div class="panel-footer">
                 <button class="primary-btn btn-on panel-save-btn" onclick="savePanelSettings()">Save Settings</button>
             </div>
-        </div><!-- /.panel-inner -->
+        </div>
     </div>
 
     <script src="/static/js/main.js?v=2"></script>

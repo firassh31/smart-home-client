@@ -6,19 +6,17 @@ async function testConnection() {
     const client = new MongoClient(uri);
 
     try {
-        // 1. התחברות
+        // connect to MongoDB
         await client.connect();
         console.log("✅ Connected to MongoDB via Node.js!");
-
-        // 2. בחירת מסד הנתונים והאוסף (אותם שמות כמו בפייתון)
+        // database and collection references
         const database = client.db("smart_home_db");
         const collection = database.collection("devices");
-
-        // 3. שליפת המכשיר הראשון שמצליחים למצוא
+        // fetch one device document to verify connection and data access
         const device = await collection.findOne({});
 
         if (device) {
-            console.log("👀 Node.js found a device created by Python:");
+            console.log("👀 Node.js found a device :");
             console.log(device);
         } else {
             console.log("🤷‍♂️ Connected, but no devices found.");

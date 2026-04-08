@@ -33,18 +33,22 @@ const el = {
     modalTitle: document.getElementById('modal-title'),
     controlPanel: document.getElementById('deviceControlPanel'),
     controlName: document.getElementById('control-device-name'),
+    panelStatusToggle: document.getElementById('panel-status-toggle'),
     brightnessSlider: document.getElementById('brightness-slider'),
     brightnessDisplay: document.getElementById('brightness-display'),
+    acDial: document.getElementById('ac-dial'),
+    acDialKnob: document.getElementById('ac-dial-knob'),
+    acDialTicks: document.getElementById('ac-dial-ticks'),
     tempDisplay: document.querySelector('.temp-display'),
     unlockBtn: document.getElementById('unlock-btn'),
     toastContainer: document.getElementById('toast-container'),
 };
 
-/* Helpers ─────*/
+/* Helpers */
 const getIcon = type => ({ light: '💡', ac: '❄️', doorlock: '🔒' }[type] || '🔌');
 
 
-/* Toast ───────*/
+/* Toast */
 const showToast = (msg, type = 'success') => {
     const t = document.createElement('div');
     t.className = `toast ${type}`;
@@ -269,7 +273,11 @@ const toggleSidebar = () => {
 /*  Dropdowns  */
 const closeAllDropdowns = () =>
     document.querySelectorAll('.device-card-dropdown.show')
-        .forEach(m => m.classList.remove('show'));
+        .forEach(m => {
+            m.classList.remove('show');
+            const card = m.closest('.device-card');
+            if (card) card.classList.remove('menu-open');
+        });
 
 /*  Device Control Panel  */
 const updateSliderFill = slider => {
@@ -277,47 +285,119 @@ const updateSliderFill = slider => {
     slider.style.setProperty('--value', pct + '%');
 };
 
+const AC_MIN_TEMP = 16;
+const AC_MAX_TEMP = 30;
+const AC_MIN_ANGLE = -180;
+const AC_MAX_ANGLE = 0;
+const AC_DIAL_RADIUS = 90;
+const AC_TRACK_RADIUS = AC_DIAL_RADIUS - 1.5;
+const clamp = (val, min, max) => Math.min(max, Math.max(min, val));
+
+const tempToAngle = temp => {
+    const t = clamp(temp, AC_MIN_TEMP, AC_MAX_TEMP);
+    const ratio = (t - AC_MIN_TEMP) / (AC_MAX_TEMP - AC_MIN_TEMP);
+    return AC_MIN_ANGLE + ratio * (AC_MAX_ANGLE - AC_MIN_ANGLE);
+};
+
+const angleToTemp = angle => {
+    const a = clamp(angle, AC_MIN_ANGLE, AC_MAX_ANGLE);
+    const ratio = (a - AC_MIN_ANGLE) / (AC_MAX_ANGLE - AC_MIN_ANGLE);
+    return Math.round(AC_MIN_TEMP + ratio * (AC_MAX_TEMP - AC_MIN_TEMP));
+};
+
+const setACTemperatureDraft = temp => {
+    const nextTemp = clamp(parseInt(temp, 10), AC_MIN_TEMP, AC_MAX_TEMP);
+    if (activeControlDevice) {
+        if (!activeControlDevice.state) activeControlDevice.state = {};
+        activeControlDevice.state.temperature = nextTemp;
+    }
+    return nextTemp;
+};
+
+const buildACTicks = () => {
+    if (!el.acDialTicks || el.acDialTicks.childElementCount) return;
+    for (let t = AC_MIN_TEMP; t <= AC_MAX_TEMP; t++) {
+        const tick = document.createElement('span');
+        tick.className = 'ac-dial-tick';
+        tick.dataset.temp = String(t);
+        el.acDialTicks.appendChild(tick);
+    }
+};
+
+const updateACTicks = () => {
+    if (!el.acDialTicks) return;
+    el.acDialTicks.querySelectorAll('.ac-dial-tick').forEach(tick => {
+        const tickTemp = parseInt(tick.dataset.temp, 10);
+        const ratio = (tickTemp - AC_MIN_TEMP) / (AC_MAX_TEMP - AC_MIN_TEMP);
+        const angle = tempToAngle(tickTemp);
+        const rad = (angle * Math.PI) / 180;
+        const x = AC_DIAL_RADIUS + AC_TRACK_RADIUS * Math.cos(rad);
+        const y = AC_DIAL_RADIUS + AC_TRACK_RADIUS * Math.sin(rad);
+        tick.style.left = `${x}px`;
+        tick.style.top = `${y}px`;
+        if (ratio <= 0.5) {
+            tick.classList.add('tick-cool');
+            tick.classList.remove('tick-warm');
+            tick.style.setProperty('--tick-blend', String(clamp(ratio / 0.5, 0, 1)));
+        } else {
+            tick.classList.add('tick-warm');
+            tick.classList.remove('tick-cool');
+            tick.style.setProperty('--tick-blend', String(clamp((ratio - 0.5) / 0.5, 0, 1)));
+        }
+    });
+};
+
+const setACDialUI = temp => {
+    const safeTemp = setACTemperatureDraft(temp);
+    const angle = tempToAngle(safeTemp);
+    const rad = (angle * Math.PI) / 180;
+    const x = AC_DIAL_RADIUS + AC_TRACK_RADIUS * Math.cos(rad);
+    const y = AC_DIAL_RADIUS + AC_TRACK_RADIUS * Math.sin(rad);
+    el.tempDisplay.textContent = String(safeTemp);
+    if (el.acDialKnob) {
+        el.acDialKnob.style.left = `${x}px`;
+        el.acDialKnob.style.top = `${y}px`;
+    }
+    updateACTicks();
+};
+
+const setPanelStatusToggleUI = status => {
+    const isOn = status === 'on';
+    el.panelStatusToggle.classList.toggle('btn-on', isOn);
+    el.panelStatusToggle.classList.toggle('btn-off', !isOn);
+    el.panelStatusToggle.textContent = isOn ? 'ON' : 'OFF';
+    el.panelStatusToggle.dataset.status = isOn ? 'on' : 'off';
+};
+
 const openDeviceControl = id => {
     const d = devices.find(d => d.id === id);
     if (!d) return;
-    // UI/UX UPGRADE: Block opening if device is OFF (except doorlocks)
-    if (d.type !== 'doorlock' && d.status === 'off') {
-        showToast('Please turn the device ON to access its settings', 'info');
-        return; // This stops the rest of the function from running!
-    }
     activeControlDevice = d;
 
     el.controlName.textContent = d.name;
+    setPanelStatusToggleUI(d.status || 'off');
 
     if (d.type === 'light') {
         el.brightnessSlider.value = d.state?.brightness || 10;
         el.brightnessDisplay.textContent = el.brightnessSlider.value;
         updateSliderFill(el.brightnessSlider);
     } else if (d.type === 'ac') {
-        el.tempDisplay.textContent = (d.state?.temperature || 22) + '°C';
+        setACDialUI(d.state?.temperature || 22);
     } else if (d.type === 'doorlock') {
-        const isLocked = d.state?.is_locked == false; // Default to locked if state is missing
+        const isLocked = d.state?.is_locked !== false; // Default to locked if state is missing
         el.unlockBtn.textContent = isLocked ? 'Unlock Door' : 'Lock Door';
         if (isLocked) {
             el.unlockBtn.classList.remove('danger-btn');
-            el.unlockBtn.classList.add('btn-on'); // Safe = Green
+            el.unlockBtn.classList.add('btn-on');
         } else {
             el.unlockBtn.classList.remove('btn-on');
-            el.unlockBtn.classList.add('danger-btn'); // Unlocked = Red/Danger
+            el.unlockBtn.classList.add('danger-btn');
         }
     }
 
     document.querySelectorAll('.device-panel').forEach(p => p.classList.add('hidden'));
     const panel = document.getElementById(`panel-${d.type}`) || document.getElementById('panel-unknown');
     panel.classList.remove('hidden');
-    // Hide the Save button footer if it's a doorlock, show it for everything else
-    const panelFooter = document.querySelector('.panel-footer');
-    if (d.type === 'doorlock') {
-        panelFooter.classList.add('hidden');
-    } else {
-        panelFooter.classList.remove('hidden');
-    }
-
     el.controlPanel.classList.add('active');
 
 };
@@ -329,54 +409,59 @@ const closeDeviceControl = () => {
 // Separate functions for status vs state updates since status is optimistic toggle but state is debounced and can have multiple fields
 const updateDeviceStatus = async newStatus => {
     if (!activeControlDevice) return;
-    try {
-        const res = await fetch(API_URL + '/' + activeControlDevice.id + '/status', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: newStatus })
-        });
-        if (res.ok) {
-            const updated = await res.json();
-            const i = devices.findIndex(d => d.id === updated.id);
-            if (i !== -1) devices[i] = updated;
-        }
-    } catch {
-        showToast('Network error', 'error');
-    }
+    const res = await fetch(API_URL + '/' + activeControlDevice.id + '/status', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+    });
+    if (!res.ok) throw new Error('status update failed');
+    const updated = await res.json();
+    const i = devices.findIndex(d => d.id === updated.id);
+    if (i !== -1) devices[i] = updated;
 };
 
 /* State update (debounced for sliders/temp) ───*/
 const updateDeviceState = async stateUpdates => {
     if (!activeControlDevice) return;
-    try {
-        console.log('Updating device state with:', stateUpdates);
-        const res = await fetch(API_URL + '/' + activeControlDevice.id + '/state', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(stateUpdates)
-        });
-        if (res.ok) {
-            const updated = await res.json();
-            const i = devices.findIndex(d => d.id === updated.id);
-            if (i !== -1) devices[i] = updated;
-        }
-    } catch {
-        showToast('Network error', 'error');
-    }
+    const res = await fetch(API_URL + '/' + activeControlDevice.id + '/state', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(stateUpdates)
+    });
+    if (!res.ok) throw new Error('state update failed');
+    const updated = await res.json();
+    const i = devices.findIndex(d => d.id === updated.id);
+    if (i !== -1) devices[i] = updated;
 };
 
 
-const savePanelSettings = () => {
+const savePanelSettings = async () => {
     if (!activeControlDevice) return;
 
+    const statusToSave = el.panelStatusToggle.dataset.status || 'off';
+    const stateUpdates = {};
+
     if (activeControlDevice.type === 'light') {
-        updateDeviceState({ brightness: parseInt(el.brightnessSlider.value) });
-        showToast('Brightness saved!', 'success');
-        closeDeviceControl();
+        stateUpdates.brightness = parseInt(el.brightnessSlider.value);
     } else if (activeControlDevice.type === 'ac') {
-        updateDeviceState({ temperature: parseInt(el.tempDisplay.textContent) });
-        showToast('Temperature saved!', 'success');
+        stateUpdates.temperature = activeControlDevice.state?.temperature ?? parseInt(el.tempDisplay.textContent);
+    } else if (activeControlDevice.type === 'doorlock') {
+        const isLocked = activeControlDevice.state?.is_locked !== false;
+        stateUpdates.is_locked = isLocked;
+    }
+
+    if (!activeControlDevice.state) activeControlDevice.state = {};
+
+    try {
+        if (Object.keys(stateUpdates).length) await updateDeviceState(stateUpdates);
+        await updateDeviceStatus(statusToSave);
+        activeControlDevice.status = statusToSave;
+        Object.assign(activeControlDevice.state, stateUpdates);
+        renderUI();
+        showToast('Settings saved!', 'success');
         closeDeviceControl();
+    } catch {
+        showToast('Could not save settings', 'error');
     }
 };
 
@@ -407,9 +492,13 @@ const setupListeners = () => {
             e.stopPropagation();
             const id = menuBtn.dataset.menu;
             const dd = document.getElementById(`device-menu-${id}`);
+            const card = menuBtn.closest('.device-card');
             const was = dd.classList.contains('show');
             closeAllDropdowns();
-            if (!was) dd.classList.add('show');
+            if (!was) {
+                dd.classList.add('show');
+                if (card) card.classList.add('menu-open');
+            }
             return;
         }
 
@@ -445,10 +534,72 @@ const setupListeners = () => {
         el.brightnessDisplay.textContent = e.target.value;
         updateSliderFill(e.target);
     });
+    // Brightness Preset Buttons Logic 
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            //Grab the value from the HTML data attribute
+            const newVal = e.target.getAttribute('data-val');
+            //Update the slider's actual value
+            el.brightnessSlider.value = newVal;
+            //Update the text display (e.g., "75")
+            el.brightnessDisplay.textContent = newVal;
+            //Run your existing visual fill function so the blue bar moves!
+            updateSliderFill(el.brightnessSlider);  
+        });
+    });
+    // --- AC Rotary Dial Gesture Logic (mouse + touch) ---
+    buildACTicks();
+    let isDraggingDial = false;
 
-    /*  AC temp buttons  */
-    document.getElementById('temp-minus').addEventListener('click', () => adjustTemp(-1));
-    document.getElementById('temp-plus').addEventListener('click', () => adjustTemp(+1));
+    const getPoint = evt => {
+        if (evt.touches && evt.touches.length) return evt.touches[0];
+        if (evt.changedTouches && evt.changedTouches.length) return evt.changedTouches[0];
+        return evt;
+    };
+
+    const updateDialFromPointer = evt => {
+        if (!activeControlDevice || activeControlDevice.type !== 'ac') return;
+        const point = getPoint(evt);
+        const rect = el.acDial.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        let rawAngle = (Math.atan2(point.clientY - cy, point.clientX - cx) * 180) / Math.PI;
+        if (rawAngle > 0) rawAngle = rawAngle > 90 ? -180 : 0;
+        const nextTemp = angleToTemp(rawAngle);
+        setACDialUI(nextTemp);
+    };
+
+    const handleDialStart = evt => {
+        if (!activeControlDevice || activeControlDevice.type !== 'ac') return;
+        isDraggingDial = true;
+        el.acDial.classList.add('dragging');
+        updateDialFromPointer(evt);
+        if (evt.cancelable) evt.preventDefault();
+    };
+
+    const handleDialMove = evt => {
+        if (!isDraggingDial) return;
+        updateDialFromPointer(evt);
+        if (evt.cancelable) evt.preventDefault();
+    };
+
+    const handleDialEnd = () => {
+        if (!isDraggingDial) return;
+        isDraggingDial = false;
+        el.acDial.classList.remove('dragging');
+    };
+
+    el.acDial.addEventListener('mousedown', handleDialStart);
+    document.addEventListener('mousemove', handleDialMove);
+    document.addEventListener('mouseup', handleDialEnd);
+    el.acDial.addEventListener('touchstart', handleDialStart, { passive: false });
+    document.addEventListener('touchmove', handleDialMove, { passive: false });
+    document.addEventListener('touchend', handleDialEnd);
+    /* Panel status toggle (staged only, save later) */
+    el.panelStatusToggle.addEventListener('click', () => {
+        const current = el.panelStatusToggle.dataset.status || 'off';
+        setPanelStatusToggleUI(current === 'on' ? 'off' : 'on');
+    });
 
     /* Door lock */
     document.getElementById('unlock-btn').addEventListener('click', e => {
@@ -459,10 +610,10 @@ const setupListeners = () => {
         const newLockedState = !isCurrentlyLocked;
         const newStatus = newLockedState ? 'on' : 'off';
 
-        // Update local state
+        // Update local-only draft (saved when Save Settings is clicked)
         if (!activeControlDevice.state) activeControlDevice.state = {};
         activeControlDevice.state.is_locked = newLockedState;
-        activeControlDevice.status = newStatus;
+        setPanelStatusToggleUI(newStatus);
 
         // Update panel button UI
         const btn = e.target;
@@ -475,20 +626,7 @@ const setupListeners = () => {
             btn.classList.add('danger-btn'); // Red
         }
 
-        // Updates dashboard card toggle UI
-        const cardToggleBtn = document.querySelector(`[data-toggle="${activeControlDevice.id}"]`);
-        if (cardToggleBtn) {
-            cardToggleBtn.classList.toggle('btn-on', newLockedState);
-            cardToggleBtn.classList.toggle('btn-off', !newLockedState);
-            cardToggleBtn.textContent = newLockedState ? 'ON' : 'OFF';
-            cardToggleBtn.dataset.status = newStatus;
-        }
-
-        // ✅ Sends BOTH updates to the database cleanly!
-        updateDeviceState({ is_locked: newLockedState });
-        updateDeviceStatus(newStatus);
-
-        showToast(newLockedState ? 'Door Locked 🔒' : 'Door Unlocked 🔓', 'info');
+        showToast(newLockedState ? 'Door locked (pending save)' : 'Door unlocked (pending save)', 'info');
     });
 
     /*  Keyboard: Escape closes modals/panel */
@@ -503,13 +641,6 @@ const setupListeners = () => {
     [el.deviceName, el.deviceRoom].forEach(inp =>
         inp.addEventListener('keydown', e => { if (e.key === 'Enter') saveDevice(); })
     );
-};
-
-const adjustTemp = delta => {
-    if (!activeControlDevice) return;
-    let temp = parseInt(el.tempDisplay.textContent) + delta;
-    temp = Math.max(16, Math.min(30, temp));
-    el.tempDisplay.textContent = temp + '°C';
 };
 
 /*  Expose globals used by inline onclick attributes */

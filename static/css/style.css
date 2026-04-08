@@ -554,13 +554,17 @@ a {
     position: relative;
     cursor: pointer;
     transition: transform var(--ease-fast), box-shadow var(--ease-fast);
-    overflow: hidden;
+    overflow: visible;
     /* Disable text selection across all browsers (Safari, Firefox, IE/Edge, Standard) */
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
+}
+
+.device-card.menu-open {
+    z-index: 30;
 }
 
 /* subtle top-edge highlight */
@@ -624,7 +628,7 @@ a {
     position: absolute;
     top: 12px;
     right: 12px;
-    z-index: 5;
+    z-index: 40;
 }
 
 .device-card-menu-btn {
@@ -1157,8 +1161,11 @@ select:focus {
     opacity: 0.75;
 }
 
-.header-spacer {
-    width: 60px;
+.panel-header-actions {
+    display: flex;
+    justify-content: flex-start;
+    padding: 3px var(--sp-lg) 12px;
+    background: #fff;
 }
 
 .panel-content {
@@ -1253,19 +1260,39 @@ select:focus {
     color: var(--text-secondary);
 }
 
-/* Temperature */
-.temp-control-wrapper {
+/* --- Preset Buttons --- */
+.preset-container {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--sp-md) 0;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.preset-btn {
+    flex: 1;
+    padding: 8px 0;
+    border: 1px solid var(--border-color, #e2e8f0);
+    background: var(--surface-color, #ffffff);
+    color: var(--text-color, #333333);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.preset-btn:hover,
+.preset-btn:active {
+    background: var(--primary-color, #007bff);
+    /* Uses your existing blue */
+    color: white;
+    border-color: var(--primary-color, #007bff);
 }
 
 .temp-display {
     font-size: 3rem;
     font-family: var(--font-heading);
     margin: 0;
-    color: var(--accent-secondary);
+    color: var(--text-secondary);
     /* Disable text selection across all browsers (Safari, Firefox, IE/Edge, Standard) */
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -1273,38 +1300,106 @@ select:focus {
     user-select: none;
 }
 
-.temp-btn {
-    width: 52px;
-    height: 52px;
-    border-radius: 50% !important;
-    font-size: 1.6rem;
+/* AC Rotary Dial */
+.ac-dial-wrap {
+    position: relative;
+    width: 220px;
+    margin: 8px auto 0;
+}
+
+.ac-range-label {
+    position: absolute;
+    top: 156px;
+    font: 600 0.82rem var(--font-base);
+    color: var(--text-secondary);
+    user-select: none;
+}
+
+.ac-range-label-left {
+    left: 8px;
+}
+
+.ac-range-label-right {
+    right: 8px;
+}
+
+.ac-dial {
+    --dial-size: 180px;
+    --dial-border: 2px;
+    width: var(--dial-size);
+    height: var(--dial-size);
+    margin: 14px auto 0;
+    border-radius: 50%;
+    position: relative;
+    background: linear-gradient(180deg, rgba(107, 176, 191, 0.16) 0%, rgba(244, 242, 239, 0.20) 100%);
+    border: var(--dial-border) solid rgba(255, 255, 255, 0.92);
+    box-shadow: var(--shadow-sm);
+    user-select: none;
+    touch-action: none;
+    overflow: visible;
+}
+
+.ac-dial.dragging .ac-dial-knob {
+    transform: translate(-50%, -50%) scale(1.12);
+}
+
+.ac-dial-ticks {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.ac-dial-tick {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    --tick-blend: 0;
+    background: var(--text-secondary);
+}
+
+.ac-dial-tick.tick-cool {
+    background: color-mix(in srgb,
+            var(--accent-secondary) calc((1 - var(--tick-blend)) * 100%),
+            var(--text-secondary) calc(var(--tick-blend) * 100%));
+}
+
+.ac-dial-tick.tick-warm {
+    background: color-mix(in srgb,
+            var(--text-secondary) calc((1 - var(--tick-blend)) * 100%),
+            var(--alert-off) calc(var(--tick-blend) * 100%));
+}
+
+.ac-dial-center {
+    position: absolute;
+    inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1.5px solid rgba(0, 0, 0, 0.12) !important;
-    background: var(--bg-page) !important;
-    flex: none;
-    color: var(--text-primary) !important;
-    transition: all var(--ease-fast);
-    /* Disable text selection across all browsers (Safari, Firefox, IE/Edge, Standard) */
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
+    gap: 2px;
+    pointer-events: none;
 }
 
-.temp-btn:hover {
-    background: var(--accent-secondary) !important;
-    color: #fff !important;
-    border-color: var(--accent-secondary) !important;
-}
-
-.temp-range-hint {
-    text-align: center;
-    font-size: 0.78rem;
+.ac-dial-center sup {
     color: var(--text-secondary);
-    margin-top: var(--sp-md);
+    font-size: 1rem;
+    font-family: var(--font-base);
+    line-height: 1;
+}
+
+.ac-dial-knob {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.95);
+    background: var(--accent-secondary);
+    box-shadow: var(--shadow-sm), 0 0 0 2px rgba(255, 255, 255, 0.55);
+    transform: translate(-50%, -50%);
+    transition: transform 0.12s ease;
+    z-index: 5;
 }
 
 .empty-panel-msg {

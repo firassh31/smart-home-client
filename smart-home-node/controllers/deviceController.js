@@ -2,6 +2,20 @@ import { getDB } from '../config/db.js';
 import { ObjectId } from 'mongodb';
 import { deviceManager } from '../services/DeviceManager.js';
 
+// GET DEVICE TYPES (Fulfills the dynamic select requirement)
+export const getDeviceTypes = (req, res) => {
+    try {
+        const types = [
+            { value: 'light', label: '💡 Light' },
+            { value: 'ac', label: '❄️ AC' },
+            { value: 'doorlock', label: '🔒 Door Lock' }
+        ];
+        res.status(200).json(types);
+    } catch (error) {
+        res.status(500).json({ error: "Failed to fetch device types" });
+    }
+};
+
 const getSafeId = (id) => {
     try {
         return ObjectId.isValid(id) ? new ObjectId(id) : id;

@@ -1,6 +1,7 @@
 import express from 'express';
 // Explicitly importing every single function so Express CANNOT get confused
 import {
+    getDeviceTypes,
     getDevices,
     addDevice,
     updateDeviceStatus,
@@ -12,6 +13,7 @@ import {
 const router = express.Router();
 
 // --- THE MAP ---
+router.get('/types', getDeviceTypes);
 router.get('/', getDevices);
 router.post('/', addDevice);
 router.delete('/:id', deleteDevice);

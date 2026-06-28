@@ -1293,6 +1293,7 @@ a {
 }
 
 @keyframes pulse-dot {
+
     0%,
     100% {
         box-shadow: 0 0 0 2px rgba(157, 204, 58, 0.3);

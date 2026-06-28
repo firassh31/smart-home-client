@@ -4,7 +4,7 @@
  * vanilla JavaScript file for the static Express-served frontend.
  */
 
-const API_URL = '/devices';
+const API_URL = 'http://localhost:3000/devices';
 let devices = [];
 let activeRoom = 'All';
 let activeControlDevice = null;
@@ -105,18 +105,39 @@ const loadDevices = async () => {
         }
     }
 };
+// Fetches the pre-calculated Active vs Inactive counts from MongoDB
+const fetchDeviceStats = async () => {
+    try {
+        const res = await fetch(`${API_URL}/stats`, { headers: getAuthHeaders() });
+        if (!res.ok) throw new Error("Failed to fetch stats");
+
+        const stats = await res.json();
+
+        let totalCount = 0;
+        let activeCount = 0;
+
+        // Parse the MongoDB aggregation array
+        stats.forEach(group => {
+            totalCount += group.count;
+            if (group._id === 'on') {
+                activeCount = group.count;
+            }
+        });
+
+        // Update the dashboard UI
+        if (el.statTotal) el.statTotal.textContent = totalCount;
+        if (el.statOn) el.statOn.textContent = activeCount;
+        if (el.activeCountDesktop) el.activeCountDesktop.textContent = activeCount;
+
+    } catch (error) {
+        console.error("Could not load dashboard stats:", error);
+    }
+};
 
 const filteredDevices = () => activeRoom === 'All'
     ? devices
     : devices.filter(d => (d.room || 'Unassigned') === activeRoom);
 
-// Keeps dashboard counters aligned with the selected room and full inventory.
-const updateActiveBadges = () => {
-    const onInFilter = filteredDevices().filter(d => d.status === 'on').length;
-    const onTotal = devices.filter(d => d.status === 'on').length;
-    if (el.activeCountDesktop) el.activeCountDesktop.textContent = onInFilter;
-    if (el.statOn) el.statOn.textContent = onTotal;
-};
 
 // Applies parent/child display rules; the API still enforces permissions.
 const applyRolePermissions = () => {
@@ -147,7 +168,7 @@ const renderUI = () => {
 
     if (el.statTotal) el.statTotal.textContent = devices.length;
     if (el.statRooms) el.statRooms.textContent = numRooms;
-    updateActiveBadges();
+    fetchDeviceStats();
 
     el.roomNav.innerHTML = rooms
         .map(room => `<button class="room-pill${room === activeRoom ? ' active' : ''}" data-room="${escapeHTML(room)}">${escapeHTML(room)}</button>`)
@@ -208,7 +229,6 @@ const toggleDevice = async (id, currentStatus) => {
 
     const btn = document.querySelector(`#deviceList [data-toggle="${id}"]`);
     if (btn) setToggleButton(btn, newStatus);
-    updateActiveBadges();
     if (activeControlDevice?.id === id && el.controlPanel.classList.contains('active')) setPanelStatusToggleUI(newStatus);
 
     try {
@@ -218,10 +238,13 @@ const toggleDevice = async (id, currentStatus) => {
             body: JSON.stringify({ status: newStatus }),
         });
         if (!res.ok) throw new Error();
+
+        await fetchDeviceStats();
+
     } catch {
         if (dev) dev.status = currentStatus;
         if (btn) setToggleButton(btn, currentStatus);
-        updateActiveBadges();
+        await fetchDeviceStats();
         if (activeControlDevice?.id === id && el.controlPanel.classList.contains('active')) setPanelStatusToggleUI(currentStatus);
         showToast('Could not update device', 'error');
     }
@@ -653,7 +676,7 @@ const setupListeners = () => {
                 authSubmitBtn.textContent = 'Processing...';
                 authSubmitBtn.disabled = true;
 
-                const response = await fetch(isLoginMode ? '/auth/login' : '/auth/register', {
+                const response = await fetch(isLoginMode ? 'http://localhost:3000/auth/login' : 'http://localhost:3000/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -739,7 +762,7 @@ const fetchWeather = async () => {
 
     const getWeatherData = async (queryUrl) => {
         try {
-            const response = await fetch(queryUrl);
+            const response = await fetch('http://localhost:3000' + queryUrl);
             if (!response.ok) throw new Error('Weather endpoint failed');
             const data = await response.json();
             const temp = Math.round(data.main.temp);

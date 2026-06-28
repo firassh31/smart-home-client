@@ -4,7 +4,7 @@
  * vanilla JavaScript file for the static Express-served frontend.
  */
 
-const API_URL = 'http://localhost:3000/devices';
+const API_URL = 'https://smart-home-server-j6ji.onrender.com/devices';
 let devices = [];
 let activeRoom = 'All';
 let activeControlDevice = null;
@@ -676,7 +676,7 @@ const setupListeners = () => {
                 authSubmitBtn.textContent = 'Processing...';
                 authSubmitBtn.disabled = true;
 
-                const response = await fetch(isLoginMode ? 'http://localhost:3000/auth/login' : 'http://localhost:3000/auth/register', {
+                const response = await fetch(isLoginMode ? 'https://smart-home-server-j6ji.onrender.com/auth/login' : 'https://smart-home-server-j6ji.onrender.com/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -762,7 +762,7 @@ const fetchWeather = async () => {
 
     const getWeatherData = async (queryUrl) => {
         try {
-            const response = await fetch('http://localhost:3000' + queryUrl);
+            const response = await fetch('https://smart-home-server-j6ji.onrender.com' + queryUrl);
             if (!response.ok) throw new Error('Weather endpoint failed');
             const data = await response.json();
             const temp = Math.round(data.main.temp);

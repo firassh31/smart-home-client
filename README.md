@@ -1,67 +1,51 @@
-# Smart Home API (Node.js MVC Architecture)
+Smart Home Dashboard (MSHome)
+MSHome is a smart-home dashboard application featuring a decoupled architecture. It manages parent and child accounts, device inventory, room filtering, and real-time device control (on/off, brightness, temperature, and lock state).
 
-MSHome is a desktop smart-home dashboard backed by a Node.js and Express API. It manages parent and child accounts, protected device inventory, room filtering, device status control, and device-specific state such as brightness, temperature, and lock state.
+🌐 Live Demo
+The application is fully deployed and accessible online:
+[INSERT_VERCEL_URL]
 
-The project uses a compact MVC-style structure with controllers, routes, middleware, services, and a static HTML/CSS/JavaScript dashboard served by Express.
+Note: The backend is hosted on Render and may take 30-50 seconds to "wake up" upon the first request.
 
-## Architecture & Tech Stack
+🏗 Architecture & Tech Stack
+Frontend: HTML5, CSS3, and vanilla JavaScript (De-coupled).
 
-* **Backend:** Node.js and Express.
-* **Database:** MongoDB Atlas.
-* **Frontend:** HTML5, CSS3, and vanilla JavaScript.
-* **Design Patterns:** MVC boundaries, role-based access control, and device shadow state.
-* **Security:** Environment variables through `dotenv`, JWT authentication, and parent-only device inventory routes.
+Backend: Node.js and Express.
 
-## Features
+Database: MongoDB Atlas.
 
-* **Authentication:** Parent and child account flows with JWT sessions.
-* **Family Access:** Parent accounts receive a family invite code; child accounts can join with that code.
-* **Role-Based UI:** Child accounts can only see allowed devices and cannot manage inventory.
-* **Room Filtering:** Devices can be filtered by room without reloading the page.
-* **Device Controls:** On/off controls, brightness, AC temperature, and door lock state.
-* **Weather Widget:** Uses a server-side proxy so the weather API key stays private.
+Security: JWT authentication, role-based access control, and environment variable management (dotenv).
 
-## Project Structure
+✨ Core Features
+Authentication: Secure parent/child flows with JWT sessions.
 
-```text
+Family Access: Parent accounts generate a family invite code; child accounts join using this code.
+
+Role-Based UI: Child accounts have restricted access (cannot manage inventory).
+
+Dynamic Dashboard: Real-time filtering by room and device control via REST API.
+
+Weather Widget: Fetches real-time weather data securely via a backend proxy.
+
+Modern Structure: Multi-page architecture (login, register, dashboard) with strict separation of concerns (zero inline JavaScript).
+
+📁 Project Structure
+Client (Frontend)
+Plaintext
+smart-home-client/
+  css/style.css        # Responsive styling
+  js/main.js           # API logic, routing, and event listeners
+  login.html           # Login view
+  register.html        # Registration view
+  dashboard.html       # Dynamic device control dashboard
+Server (Backend)
+Plaintext
 smart-home-node/
-  config/              MongoDB connection
-  controllers/         Auth and device request handlers
-  middleware/          JWT and role checks
-  routes/              Express route definitions
-  services/            Device observer registry
-  server.js            Express startup and frontend serving
-static/
-  css/style.css        Dashboard styling
-  js/main.js           Dashboard behavior
-templates/
-  index.html           Dashboard markup
-```
-
-## Environment Variables
-
-Create a `.env` file in `smart-home-node/` with:
-
-```bash
-MONGO_URI="mongodb+srv://<username>:<password>@<your-cluster-address>/?retryWrites=true&w=majority"
-JWT_SECRET="replace-with-a-long-random-secret"
-WEATHER_API_KEY="your-openweathermap-key"
-PORT=3000
-```
-
-## Run The Project
-
-```bash
-cd smart-home-node
-npm install
-npm start
-```
-
-Then open:
-
-```text
-http://localhost:3000
-```
+  config/              # MongoDB connection
+  controllers/         # Request handlers
+  middleware/          # JWT and role authorization
+  routes/              # API endpoints
+  server.js            # API startup
 
 ## API Endpoints
 

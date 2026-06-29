@@ -1,52 +1,48 @@
-Smart Home Dashboard (MSHome)
-MSHome is a smart-home dashboard application featuring a decoupled architecture. It manages parent and child accounts, device inventory, room filtering, and real-time device control (on/off, brightness, temperature, and lock state).
+# Smart Home Dashboard (MSHome)
 
-🌐 Live Demo
+MSHome is a smart-home dashboard featuring a decoupled architecture. It manages parent and child accounts, device inventory, room filtering, and real-time device control (on/off, brightness, temperature, and lock state).
+
+## 🌐 Live Demo
 The application is fully deployed and accessible online:
-[INSERT_VERCEL_URL]
+** https://smart-home-client-olive.vercel.app/ **
 
-Note: The backend is hosted on Render and may take 30-50 seconds to "wake up" upon the first request.
 
-🏗 Architecture & Tech Stack
-Frontend: HTML5, CSS3, and vanilla JavaScript (De-coupled).
 
-Backend: Node.js and Express.
+## 🏗 Architecture & Tech Stack
 
-Database: MongoDB Atlas.
+* **Frontend:** HTML5, CSS3, and vanilla JavaScript.
+* **Separation of Concerns:** 100% strict separation. Zero inline JavaScript. All logic, DOM manipulation, and routing are handled cleanly via event listeners in `main.js`.
+* **Backend:** Node.js, Express, MongoDB Atlas.
+* **Deployment:** Vercel (Frontend) & Render (Backend).
 
-Security: JWT authentication, role-based access control, and environment variable management (dotenv).
+## ✨ Core Features
 
-✨ Core Features
-Authentication: Secure parent/child flows with JWT sessions.
+* **Authentication:** Secure parent/child flows with JWT sessions.
+* **Family Access:** Parent accounts generate a family invite code; child accounts join using this code.
+* **Role-Based UI:** Child accounts have restricted access (cannot manage inventory).
+* **Dynamic Dashboard:** Real-time filtering by room and device control via REST API.
+* **Weather Widget:** Fetches real-time weather data securely via a backend proxy.
 
-Family Access: Parent accounts generate a family invite code; child accounts join using this code.
+## 📁 Project Structure
 
-Role-Based UI: Child accounts have restricted access (cannot manage inventory).
-
-Dynamic Dashboard: Real-time filtering by room and device control via REST API.
-
-Weather Widget: Fetches real-time weather data securely via a backend proxy.
-
-Modern Structure: Multi-page architecture (login, register, dashboard) with strict separation of concerns (zero inline JavaScript).
-
-📁 Project Structure
-Client (Frontend)
-Plaintext
+### Client (Frontend)
+```text
 smart-home-client/
   css/style.css        # Responsive styling
   js/main.js           # API logic, routing, and event listeners
   login.html           # Login view
   register.html        # Registration view
-  dashboard.html       # Dynamic device control dashboard
-Server (Backend)
-Plaintext
+  dashboard.html       # Main dynamic device dashboard
+```
+### Server (Backend)
+```text
 smart-home-node/
   config/              # MongoDB connection
   controllers/         # Request handlers
   middleware/          # JWT and role authorization
   routes/              # API endpoints
   server.js            # API startup
-
+```
 ## API Endpoints
 
 | Method | Endpoint | Description |

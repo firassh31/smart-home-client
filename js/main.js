@@ -690,43 +690,46 @@ const setupListeners = () => {
                 authSubmitBtn.disabled = false;
             }
         });
-        // Top Navigation Buttons
-        document.getElementById('logout-btn')?.addEventListener('click', () => {
-            localStorage.clear();
-            window.location.href = 'login.html';
-        });
-        // Copy Family Code Button
-        document.getElementById('desktop-family-code')?.addEventListener('click', async () => {
-            const code = localStorage.getItem('mshome_code');
-            if (!code) return;
-            try {
-                await navigator.clipboard.writeText(code);
-                showToast('Invite code copied to clipboard!', 'success');
-            } catch {
-                showToast('Failed to copy code.', 'error');
-            }
-        });
-
-        document.getElementById('desktop-add-btn')?.addEventListener('click', openAddModal);
-
-        // Delete Modal Buttons
-        document.getElementById('delete-modal-backdrop')?.addEventListener('click', closeModal);
-        document.getElementById('cancel-delete-btn')?.addEventListener('click', closeModal);
-        document.getElementById('confirm-delete-btn')?.addEventListener('click', confirmDelete);
-
-        // Add/Edit Modal Buttons
-        document.getElementById('add-modal-backdrop')?.addEventListener('click', closeAddModal);
-        document.getElementById('cancel-add-btn')?.addEventListener('click', closeAddModal);
-        document.getElementById('save-device-btn')?.addEventListener('click', saveDevice);
-
-        // Device Control Panel Buttons
-        document.getElementById('close-control-btn')?.addEventListener('click', closeDeviceControl);
-        document.getElementById('save-panel-btn')?.addEventListener('click', savePanelSettings);
     }
+    // Top Navigation Buttons
+    document.getElementById('logout-btn')?.addEventListener('click', () => {
+        localStorage.clear();
+        window.location.href = 'login.html';
+    });
+
+    // Copy Family Code Button
+    document.getElementById('desktop-family-code')?.addEventListener('click', async () => {
+        const code = localStorage.getItem('mshome_code');
+        if (!code) return;
+        try {
+            await navigator.clipboard.writeText(code);
+            showToast('Invite code copied to clipboard!', 'success');
+        } catch {
+            showToast('Failed to copy code.', 'error');
+        }
+    });
+
+    document.getElementById('desktop-add-btn')?.addEventListener('click', openAddModal);
+
+    // Delete Modal Buttons
+    document.getElementById('delete-modal-backdrop')?.addEventListener('click', closeModal);
+    document.getElementById('cancel-delete-btn')?.addEventListener('click', closeModal);
+    document.getElementById('confirm-delete-btn')?.addEventListener('click', confirmDelete);
+
+    // Add/Edit Modal Buttons
+    document.getElementById('add-modal-backdrop')?.addEventListener('click', closeAddModal);
+    document.getElementById('cancel-add-btn')?.addEventListener('click', closeAddModal);
+    document.getElementById('save-device-btn')?.addEventListener('click', saveDevice);
+
+    // Device Control Panel Buttons
+    document.getElementById('close-control-btn')?.addEventListener('click', closeDeviceControl);
+    document.getElementById('save-panel-btn')?.addEventListener('click', savePanelSettings);
+
 
     document.addEventListener('click', onDocumentClick);
 
-    el.brightnessSlider.addEventListener('input', event => {
+    // ADDED `?.` TO ALL OF THESE SO THEY DON'T CRASH THE LOGIN PAGE
+    el.brightnessSlider?.addEventListener('input', event => {
         el.brightnessDisplay.textContent = event.target.value;
         updateSliderFill(event.target);
     });
@@ -741,11 +744,11 @@ const setupListeners = () => {
 
     setupACDialGestures();
 
-    el.panelStatusToggle.addEventListener('click', () => {
+    el.panelStatusToggle?.addEventListener('click', () => {
         setPanelStatusToggleUI(el.panelStatusToggle.dataset.status === 'on' ? 'off' : 'on');
     });
 
-    el.unlockBtn.addEventListener('click', event => {
+    el.unlockBtn?.addEventListener('click', event => {
         if (!activeControlDevice) return;
         const nextLocked = activeControlDevice.state?.is_locked === false;
         if (!activeControlDevice.state) activeControlDevice.state = {};
@@ -757,18 +760,17 @@ const setupListeners = () => {
 
     document.addEventListener('keydown', event => {
         if (event.key !== 'Escape') return;
-        if (el.addModal.classList.contains('is-open')) closeAddModal();
-        if (el.deleteModal.classList.contains('is-open')) closeModal();
-        if (el.controlPanel.classList.contains('active')) closeDeviceControl();
+        if (el.addModal?.classList.contains('is-open')) closeAddModal();
+        if (el.deleteModal?.classList.contains('is-open')) closeModal();
+        if (el.controlPanel?.classList.contains('active')) closeDeviceControl();
     });
 
     [el.deviceName, el.deviceRoom].forEach(input =>
-        input.addEventListener('keydown', event => {
+        input?.addEventListener('keydown', event => {
             if (event.key === 'Enter') saveDevice();
         })
     );
 };
-
 // Weather data is fetched through the server proxy so the API key stays private.
 const fetchWeather = async () => {
     const iconEl = document.getElementById('weather-icon');

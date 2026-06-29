@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - MSHome</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <div id="auth-page" class="auth-overlay">
+        <div class="modal-content auth-box">
+            <a href="dashboard.html" class="auth-logo" style="text-decoration: none;">
+                <span class="brand-mark">MS</span>
+                <span class="brand-text">MSHome</span>
+            </a>
+            <h3>Login</h3>
+            <p class="modal-subtitle">Manage your smart devices securely.</p>
+
+            <form id="auth-form">
+                <div class="input-group" id="auth-name-group">
+                    <label for="auth-name">Username</label>
+                    <input type="text" id="auth-name" placeholder="e.g. John Doe" required>
+                </div>
+                <div class="input-group">
+                    <label for="auth-password">Password</label>
+                    <input type="password" id="auth-password" placeholder="Minimum 6 characters" required>
+                </div>
+
+                <p id="auth-message" class="auth-msg-text"></p>
+                <button type="submit" id="auth-submit-btn" class="primary-btn btn-on full-width-btn">Sign In</button>
+
+                <p class="auth-toggle-wrapper">
+                    <span id="auth-toggle-text">Don't have an account?</span>
+                    <a href="register.html">Register here</a>
+                </p>
+            </form>
+        </div>
+    </div>
+    <script src="/js/main.js" defer></script>
+</body>
+
+</html>

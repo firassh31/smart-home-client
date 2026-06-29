@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - MSHome</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <div id="auth-page" class="auth-overlay">
+        <div class="modal-content auth-box">
+            <a href="dashboard.html" class="auth-logo" style="text-decoration: none;">
+                <span class="brand-mark">MS</span>
+                <span class="brand-text">MSHome</span>
+            </a>
+            <h3>Create Account</h3>
+            <p class="modal-subtitle">Join your smart home family.</p>
+
+            <form id="auth-form">
+                <div class="input-group" id="auth-name-group">
+                    <label for="auth-name">Username</label>
+                    <input type="text" id="auth-name" placeholder="e.g. John Doe" required>
+                </div>
+                <div class="input-group" id="auth-email-group">
+                    <label for="auth-email">Email Address</label>
+                    <input type="email" id="auth-email" placeholder="e.g. john@mshome.com" required>
+                </div>
+                <div class="input-group" id="auth-role-group">
+                    <label for="auth-role">Account Type</label>
+                    <select id="auth-role">
+                        <option value="parent">Parent (Full Access)</option>
+                        <option value="child">Child (Restricted Access)</option>
+                    </select>
+                </div>
+                <div class="input-group hidden" id="auth-parent-group">
+                    <label for="auth-family-code">Family Invite Code</label>
+                    <input type="text" id="auth-family-code" placeholder="e.g. X7B9Q2">
+                </div>
+                <div class="input-group">
+                    <label for="auth-password">Password</label>
+                    <input type="password" id="auth-password" placeholder="Minimum 6 characters" required>
+                </div>
+
+                <p id="auth-message" class="auth-msg-text"></p>
+                <button type="submit" id="auth-submit-btn" class="primary-btn btn-on full-width-btn">Create
+                    Account</button>
+
+                <p class="auth-toggle-wrapper">
+                    <span id="auth-toggle-text">Already have an account?</span>
+                    <a href="login.html">Log in here</a>
+                </p>
+            </form>
+        </div>
+    </div>
+    <script src="/js/main.js" defer></script>
+</body>
+
+</html>

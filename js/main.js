@@ -1,8 +1,8 @@
 /**
- * MSHome dashboard.
- * Keeps API calls, role rules, rendering, and device control behavior in one
- * vanilla JavaScript file for the static Express-served frontend.
- */
+* MSHome dashboard.
+* Keeps API calls, role rules, rendering, and device control behavior in one
+* vanilla JavaScript file for the static Express-served frontend.
+*/
 
 const API_URL = 'https://smart-home-server-j6ji.onrender.com/devices';
 let devices = [];
@@ -627,24 +627,12 @@ const setupListeners = () => {
     const emailGroup = document.getElementById('auth-email-group');
     const parentGroup = document.getElementById('auth-parent-group');
     const roleSelect = document.getElementById('auth-role');
-    let isLoginMode = true;
+    let isLoginMode = !window.location.pathname.includes('register');
 
     if (authForm) {
-        roleSelect.addEventListener('change', event => {
-            parentGroup.classList.toggle('hidden', event.target.value !== 'child' || isLoginMode);
-        });
-
-        authToggleLink.addEventListener('click', event => {
-            event.preventDefault();
-            isLoginMode = !isLoginMode;
-            roleGroup.classList.toggle('hidden', isLoginMode);
-            emailGroup.classList.toggle('hidden', isLoginMode);
-            parentGroup.classList.toggle('hidden', isLoginMode || roleSelect.value !== 'child');
-            authSubmitBtn.textContent = isLoginMode ? 'Sign In' : 'Create Account';
-            authToggleText.textContent = isLoginMode ? "Don't have an account?" : "Already have an account?";
-            authToggleLink.textContent = isLoginMode ? 'Register here' : 'Log in here';
-            document.querySelector('.auth-box h3').textContent = isLoginMode ? 'Create Account / Login' : 'Create Account';
-            authMessage.textContent = '';
+        // Use optional chaining (?.) so JS doesn't crash if an element isn't on the page
+        roleSelect?.addEventListener('change', event => {
+            parentGroup?.classList.toggle('hidden', event.target.value !== 'child' || isLoginMode);
         });
 
         authForm.addEventListener('submit', async event => {
@@ -652,7 +640,7 @@ const setupListeners = () => {
 
             const name = document.getElementById('auth-name').value.trim();
             const password = document.getElementById('auth-password').value.trim();
-            const role = roleSelect.value;
+            const role = roleSelect ? roleSelect.value : 'parent';
             const codeInput = document.getElementById('auth-family-code');
             const familyCode = codeInput ? codeInput.value.trim().toUpperCase() : '';
 
@@ -666,7 +654,8 @@ const setupListeners = () => {
             if (isLoginMode) {
                 payload = { name, password };
             } else {
-                const email = document.getElementById('auth-email').value.trim();
+                const emailEl = document.getElementById('auth-email');
+                const email = emailEl ? emailEl.value.trim() : '';
                 if (!email) return authMessage.textContent = "Error: Email is required to register.";
                 if (password.length < 6) return authMessage.textContent = "Error: Password must be at least 6 characters.";
                 payload = { name, email, password, role, familyCode };
@@ -690,12 +679,9 @@ const setupListeners = () => {
                 authMessage.className = 'auth-msg-text success';
                 authMessage.textContent = data.message;
 
+                // Send the user to the new dashboard page!
                 setTimeout(() => {
-                    document.getElementById('auth-page').classList.add('hidden');
-                    applyRolePermissions();
-                    loadDeviceTypes();
-                    loadDevices();
-                    fetchWeather();
+                    window.location.href = 'dashboard.html';
                 }, 1000);
             } catch (error) {
                 authMessage.textContent = `Error: ${error.message}`;
@@ -704,6 +690,38 @@ const setupListeners = () => {
                 authSubmitBtn.disabled = false;
             }
         });
+        // Top Navigation Buttons
+        document.getElementById('logout-btn')?.addEventListener('click', () => {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        });
+        // Copy Family Code Button
+        document.getElementById('desktop-family-code')?.addEventListener('click', async () => {
+            const code = localStorage.getItem('mshome_code');
+            if (!code) return;
+            try {
+                await navigator.clipboard.writeText(code);
+                showToast('Invite code copied to clipboard!', 'success');
+            } catch {
+                showToast('Failed to copy code.', 'error');
+            }
+        });
+
+        document.getElementById('desktop-add-btn')?.addEventListener('click', openAddModal);
+
+        // Delete Modal Buttons
+        document.getElementById('delete-modal-backdrop')?.addEventListener('click', closeModal);
+        document.getElementById('cancel-delete-btn')?.addEventListener('click', closeModal);
+        document.getElementById('confirm-delete-btn')?.addEventListener('click', confirmDelete);
+
+        // Add/Edit Modal Buttons
+        document.getElementById('add-modal-backdrop')?.addEventListener('click', closeAddModal);
+        document.getElementById('cancel-add-btn')?.addEventListener('click', closeAddModal);
+        document.getElementById('save-device-btn')?.addEventListener('click', saveDevice);
+
+        // Device Control Panel Buttons
+        document.getElementById('close-control-btn')?.addEventListener('click', closeDeviceControl);
+        document.getElementById('save-panel-btn')?.addEventListener('click', savePanelSettings);
     }
 
     document.addEventListener('click', onDocumentClick);
@@ -813,44 +831,28 @@ const fetchWeather = async () => {
     }
 };
 
-// Inline HTML handlers are kept mapped here for the static template.
-window.saveDevice = saveDevice;
-window.confirmDelete = confirmDelete;
-window.openAddModal = openAddModal;
-window.closeAddModal = closeAddModal;
-window.closeModal = closeModal;
-window.closeDeviceControl = closeDeviceControl;
-window.savePanelSettings = savePanelSettings;
-window.copyFamilyCode = async () => {
-    const code = localStorage.getItem('mshome_code');
-    if (!code) return;
 
-    try {
-        await navigator.clipboard.writeText(code);
-        showToast('Invite code copied to clipboard!', 'success');
-    } catch {
-        showToast('Failed to copy code.', 'error');
-    }
-};
-window.logout = () => {
-    localStorage.clear();
-    window.location.reload();
-};
 
 window.addEventListener('DOMContentLoaded', () => {
     setupListeners();
 
     const token = localStorage.getItem('mshome_token');
-    const authPage = document.getElementById('auth-page');
+    const authFormExists = document.getElementById('auth-form');
+    const dashboardExists = document.getElementById('deviceList');
 
     if (token && token !== 'undefined' && token !== 'null') {
-        if (authPage) authPage.classList.add('hidden');
-        applyRolePermissions();
-        loadDevices();
-        loadDeviceTypes();
-        fetchWeather();
+        if (authFormExists) {
+            window.location.href = 'dashboard.html';
+        } else if (dashboardExists) {
+            applyRolePermissions();
+            loadDevices();
+            loadDeviceTypes();
+            fetchWeather();
+        }
     } else {
         localStorage.clear();
-        if (authPage) authPage.classList.remove('hidden');
+        if (dashboardExists) {
+            window.location.href = 'login.html';
+        }
     }
 });

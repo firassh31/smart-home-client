@@ -4,61 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MSHome</title>
+    <title>Dashboard - MSHome</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 
 <body>
-    <div id="auth-page" class="auth-overlay">
-        <div class="modal-content auth-box">
-            <div class="auth-logo">
-                <span class="brand-mark">MS</span>
-                <span class="brand-text">MSHome</span>
-            </div>
-            <h3>Create Account / Login</h3>
-            <p class="modal-subtitle">Manage your smart devices securely.</p>
-            <form id="auth-form">
-                <div class="input-group" id="auth-name-group">
-                    <label for="auth-name">Username</label>
-                    <input type="text" id="auth-name" placeholder="e.g. John Doe">
-                </div>
-                <div class="input-group hidden" id="auth-role-group">
-                    <label for="auth-role">Account Type</label>
-                    <select id="auth-role">
-                        <option value="parent">Parent (Full Access)</option>
-                        <option value="child">Child (Restricted Access)</option>
-                    </select>
-                </div>
-                <div class="input-group hidden" id="auth-parent-group">
-                    <label for="auth-family-code">Family Invite Code</label>
-                    <input type="text" id="auth-family-code" placeholder="e.g. X7B9Q2">
-                </div>
-                <div class="input-group hidden" id="auth-email-group">
-                    <label for="auth-email">Email Address</label>
-                    <input type="text" id="auth-email" placeholder="e.g. john@mshome.com">
-                </div>
-                <div class="input-group">
-                    <label for="auth-password">Password</label>
-                    <input type="password" id="auth-password" placeholder="Minimum 6 characters">
-                </div>
-                <p id="auth-message" class="auth-msg-text"></p>
-                <button type="submit" id="auth-submit-btn" class="primary-btn btn-on full-width-btn">Sign In</button>
-                <p class="auth-toggle-wrapper">
-                    <span id="auth-toggle-text">Don't have an account?</span>
-                    <a href="#" id="auth-toggle-link">Register here</a>
-                </p>
-            </form>
-        </div>
-    </div>
-
     <header class="desktop-navbar">
         <div class="desktop-navbar-inner">
-            <div class="navbar-brand">
+            <a href="dashboard.html" class="navbar-brand" style="text-decoration: none;">
                 <span class="brand-mark">MS</span>
                 <span class="brand-text">MSHome</span>
                 <span class="navbar-divider"></span>
                 <span class="navbar-subtitle">Smart Control</span>
-            </div>
+            </a>
             <nav class="navbar-links" aria-label="Main navigation">
                 <button class="navbar-link navbar-link--active">Dashboard</button>
             </nav>
@@ -72,7 +30,7 @@
                     <span class="status-dot"></span>
                     <span id="active-count-desktop">0</span>&nbsp;Active
                 </div>
-                <button class="navbar-logout-btn" onclick="logout()">Logout</button>
+                <button id="logout-btn" class="navbar-logout-btn">Logout</button>
             </div>
         </div>
     </header>
@@ -83,7 +41,7 @@
                 <h2 class="hero-title">Welcome back</h2>
                 <p class="hero-sub">Monitor and control all your smart devices from one place.</p>
                 <div id="desktop-family-code" class="hidden code-display-box desktop-code-display"
-                    onclick="copyFamilyCode()" title="Click to copy invite code">
+                    title="Click to copy invite code">
                     <span class="desktop-code-label">Family Invite Code:</span>
                     <strong id="desktop-code-val" class="desktop-code-value">------</strong>
                     <span class="code-copy-icon">Copy</span>
@@ -110,7 +68,7 @@
         <main class="content-wrapper">
             <div class="room-nav-row">
                 <div id="room-nav" class="room-nav-container"></div>
-                <button class="desktop-add-btn" onclick="openAddModal()">+ Add Device</button>
+                <button id="desktop-add-btn" class="desktop-add-btn">+ Add Device</button>
             </div>
             <div class="section-header">
                 <h2 class="section-title">Devices</h2>
@@ -127,20 +85,20 @@
     <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
 
     <div id="deleteModal" class="modal" role="dialog" aria-modal="true">
-        <div class="modal-backdrop" onclick="closeModal()"></div>
+        <div id="delete-modal-backdrop" class="modal-backdrop"></div>
         <div class="modal-content">
             <h3>Delete Device</h3>
             <p class="modal-subtitle">This action cannot be undone. Are you sure?</p>
             <input type="hidden" id="deleteIdField">
             <div class="modal-actions">
-                <button class="secondary-btn" onclick="closeModal()">Cancel</button>
-                <button class="primary-btn danger-btn" onclick="confirmDelete()">Delete</button>
+                <button id="cancel-delete-btn" class="secondary-btn">Cancel</button>
+                <button id="confirm-delete-btn" class="primary-btn danger-btn">Delete</button>
             </div>
         </div>
     </div>
 
     <div id="addModal" class="modal" role="dialog" aria-modal="true">
-        <div class="modal-backdrop" onclick="closeAddModal()"></div>
+        <div id="add-modal-backdrop" class="modal-backdrop"></div>
         <div class="modal-content">
             <h3 id="modal-title">Add New Device</h3>
             <input type="hidden" id="editing-device-id">
@@ -163,8 +121,8 @@
                 <label for="device-child-access" class="checkbox-label">Allow Child Access</label>
             </div>
             <div class="modal-actions">
-                <button class="secondary-btn" onclick="closeAddModal()">Cancel</button>
-                <button class="primary-btn btn-on" onclick="saveDevice()">Save</button>
+                <button id="cancel-add-btn" class="secondary-btn">Cancel</button>
+                <button id="save-device-btn" class="primary-btn btn-on">Save</button>
             </div>
         </div>
     </div>
@@ -172,7 +130,7 @@
     <div id="deviceControlPanel" class="control-panel" role="dialog" aria-modal="true">
         <div class="panel-inner">
             <div class="panel-header">
-                <button class="back-btn" onclick="closeDeviceControl()">&larr; Back</button>
+                <button id="close-control-btn" class="back-btn">&larr; Back</button>
                 <h2 id="control-device-name">Device</h2>
                 <button id="panel-status-toggle" class="toggle-btn btn-off" type="button">OFF</button>
             </div>
@@ -231,12 +189,12 @@
                 </div>
             </div>
             <div class="panel-footer">
-                <button class="primary-btn btn-on panel-save-btn" onclick="savePanelSettings()">Save Settings</button>
+                <button id="save-panel-btn" class="primary-btn btn-on panel-save-btn">Save Settings</button>
             </div>
         </div>
     </div>
 
-    <script src="/js/main.js?v=5"></script>
+    <script src="/js/main.js" defer></script>
 </body>
 
 </html>

@@ -852,7 +852,7 @@ window.addEventListener('DOMContentLoaded', () => {
     } else {
         localStorage.clear();
         if (dashboardExists) {
-            window.location.href = 'login.html';
+            window.location.href = 'index.html';
         }
     }
 });

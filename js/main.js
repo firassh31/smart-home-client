@@ -694,7 +694,7 @@ const setupListeners = () => {
     // Top Navigation Buttons
     document.getElementById('logout-btn')?.addEventListener('click', () => {
         localStorage.clear();
-        window.location.href = 'login.html';
+        window.location.href = 'index.html';
     });
 
     // Copy Family Code Button

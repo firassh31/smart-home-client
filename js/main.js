@@ -4,7 +4,8 @@
 * vanilla JavaScript file for the static Express-served frontend.
 */
 
-const API_URL = 'https://smart-home-server-j6ji.onrender.com/devices';
+const API_BASE = 'https://smart-home-server-j6ji.onrender.com';
+const API_URL = `${API_BASE}/devices`;
 let devices = [];
 let activeRoom = 'All';
 let activeControlDevice = null;
@@ -651,21 +652,26 @@ const setupListeners = () => {
             }
 
             let payload;
+            let phone = '';
             if (isLoginMode) {
-                payload = { name, password };
+                // The backend accepts a username, email, or phone number here.
+                payload = { identifier: name, password };
             } else {
                 const emailEl = document.getElementById('auth-email');
                 const email = emailEl ? emailEl.value.trim() : '';
+                const phoneEl = document.getElementById('auth-phone');
+                phone = phoneEl ? phoneEl.value.replace(/[\s\-().]/g, '') : '';
                 if (!email) return authMessage.textContent = "Error: Email is required to register.";
+                if (!/^\+?[0-9]{7,15}$/.test(phone)) return authMessage.textContent = "Error: Enter a valid phone number, e.g. +972501234567.";
                 if (password.length < 6) return authMessage.textContent = "Error: Password must be at least 6 characters.";
-                payload = { name, email, password, role, familyCode };
+                payload = { name, email, phone_number: phone, password, role, familyCode };
             }
 
             try {
                 authSubmitBtn.textContent = 'Processing...';
                 authSubmitBtn.disabled = true;
 
-                const response = await fetch(isLoginMode ? 'https://smart-home-server-j6ji.onrender.com/auth/login' : 'https://smart-home-server-j6ji.onrender.com/auth/register', {
+                const response = await fetch(`${API_BASE}/auth/${isLoginMode ? 'login' : 'register'}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -673,16 +679,30 @@ const setupListeners = () => {
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || 'Authentication failed');
 
-                localStorage.setItem('mshome_token', data.token);
-                localStorage.setItem('mshome_role', data.role);
-                localStorage.setItem('mshome_code', data.familyCode || '');
                 authMessage.className = 'auth-msg-text success';
                 authMessage.textContent = data.message;
 
-                // Send the user to the new dashboard page!
-                setTimeout(() => {
-                    window.location.href = 'dashboard.html';
-                }, 1000);
+                if (isLoginMode) {
+                    localStorage.setItem('mshome_token', data.token);
+                    localStorage.setItem('mshome_role', data.role);
+                    localStorage.setItem('mshome_code', data.familyCode || '');
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1000);
+                } else {
+                    // The session is stored only after the SMS code is
+                    // confirmed on the verify page. The OTP was already sent
+                    // by the server flow below.
+                    await fetch(`${API_BASE}/auth/send-otp`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ phone_number: phone })
+                    }).catch(() => { /* verify page offers a resend button */ });
+
+                    setTimeout(() => {
+                        window.location.href = `verify.html?phone=${encodeURIComponent(phone)}`;
+                    }, 800);
+                }
             } catch (error) {
                 authMessage.textContent = `Error: ${error.message}`;
             } finally {
@@ -771,6 +791,130 @@ const setupListeners = () => {
         })
     );
 };
+// Wires the SMS OTP verification page (verify.html).
+const setupOtpPage = () => {
+    const otpForm = document.getElementById('otp-form');
+    if (!otpForm) return;
+
+    const digits = [...document.querySelectorAll('.otp-digit')];
+    const message = document.getElementById('auth-message');
+    const submitBtn = document.getElementById('otp-submit-btn');
+    const resendBtn = document.getElementById('otp-resend-btn');
+    const subtitle = document.getElementById('otp-subtitle');
+    const phone = new URLSearchParams(window.location.search).get('phone') || '';
+
+    if (!phone) {
+        window.location.href = 'index.html';
+        return;
+    }
+    subtitle.textContent = `Enter the 6-digit code we sent via SMS to ${phone}.`;
+
+    const RESEND_SECONDS = 60;
+    let resendTimer = null;
+
+    const startResendCooldown = () => {
+        let remaining = RESEND_SECONDS;
+        resendBtn.disabled = true;
+        resendBtn.textContent = `Resend in ${remaining}s`;
+        clearInterval(resendTimer);
+        resendTimer = setInterval(() => {
+            remaining -= 1;
+            if (remaining <= 0) {
+                clearInterval(resendTimer);
+                resendBtn.disabled = false;
+                resendBtn.textContent = 'Resend code';
+            } else {
+                resendBtn.textContent = `Resend in ${remaining}s`;
+            }
+        }, 1000);
+    };
+
+    const currentCode = () => digits.map(input => input.value).join('');
+
+    const verifyCode = async () => {
+        const otp = currentCode();
+        message.className = 'auth-msg-text error';
+        if (!/^\d{6}$/.test(otp)) return message.textContent = 'Error: Enter all 6 digits.';
+
+        try {
+            submitBtn.textContent = 'Verifying...';
+            submitBtn.disabled = true;
+
+            const response = await fetch(`${API_BASE}/auth/verify-otp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone_number: phone, otp })
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Verification failed');
+
+            localStorage.setItem('mshome_token', data.token);
+            localStorage.setItem('mshome_role', data.role);
+            localStorage.setItem('mshome_code', data.familyCode || '');
+            message.className = 'auth-msg-text success';
+            message.textContent = data.message;
+            setTimeout(() => {
+                window.location.href = 'dashboard.html';
+            }, 800);
+        } catch (error) {
+            message.textContent = `Error: ${error.message}`;
+            digits.forEach(input => { input.value = ''; });
+            digits[0].focus();
+        } finally {
+            submitBtn.textContent = 'Verify Code';
+            submitBtn.disabled = false;
+        }
+    };
+
+    // Auto-advance, backspace navigation, and full-code paste support.
+    digits.forEach((input, index) => {
+        input.addEventListener('input', () => {
+            input.value = input.value.replace(/\D/g, '').slice(0, 1);
+            if (input.value && index < digits.length - 1) digits[index + 1].focus();
+            if (currentCode().length === digits.length) verifyCode();
+        });
+
+        input.addEventListener('keydown', event => {
+            if (event.key === 'Backspace' && !input.value && index > 0) digits[index - 1].focus();
+        });
+
+        input.addEventListener('paste', event => {
+            event.preventDefault();
+            const pasted = (event.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, digits.length);
+            if (!pasted) return;
+            digits.forEach((box, boxIndex) => { box.value = pasted[boxIndex] || ''; });
+            digits[Math.min(pasted.length, digits.length - 1)].focus();
+            if (pasted.length === digits.length) verifyCode();
+        });
+    });
+
+    otpForm.addEventListener('submit', event => {
+        event.preventDefault();
+        verifyCode();
+    });
+
+    resendBtn.addEventListener('click', async () => {
+        message.className = 'auth-msg-text error';
+        try {
+            const response = await fetch(`${API_BASE}/auth/send-otp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone_number: phone })
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Could not resend the code');
+            message.className = 'auth-msg-text success';
+            message.textContent = data.message;
+            startResendCooldown();
+        } catch (error) {
+            message.textContent = `Error: ${error.message}`;
+        }
+    });
+
+    digits[0].focus();
+    startResendCooldown();
+};
+
 // Weather data is fetched through the server proxy so the API key stays private.
 const fetchWeather = async () => {
     const iconEl = document.getElementById('weather-icon');
@@ -837,6 +981,7 @@ const fetchWeather = async () => {
 
 window.addEventListener('DOMContentLoaded', () => {
     setupListeners();
+    setupOtpPage();
 
     const token = localStorage.getItem('mshome_token');
     const authFormExists = document.getElementById('auth-form');

@@ -1328,3 +1328,41 @@ a {
         transform: translateY(-8px);
     }
 }
+/* SMS OTP verification (verify.html) */
+.otp-inputs {
+    display: flex;
+    gap: var(--sp-sm);
+    justify-content: space-between;
+    margin: var(--sp-lg) 0 var(--sp-md);
+}
+
+.otp-digit {
+    width: 52px;
+    height: 60px;
+    text-align: center;
+    font-family: var(--font-heading);
+    font-size: 24px;
+    color: var(--text-primary);
+    background: var(--bg-soft);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--br-sm);
+    outline: none;
+    transition: border-color var(--ease-fast), box-shadow var(--ease-fast);
+}
+
+.otp-digit:focus {
+    border-color: var(--accent-on);
+    box-shadow: 0 0 0 3px rgba(52, 64, 10, 0.12);
+}
+
+.link-btn {
+    color: var(--accent-on);
+    font-family: var(--font-heading);
+    font-size: 13px;
+    padding: 0;
+}
+
+.link-btn:disabled {
+    color: var(--text-secondary);
+    cursor: default;
+}

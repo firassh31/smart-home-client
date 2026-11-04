@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Phone - MSHome</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <div id="auth-page" class="auth-overlay">
+        <div class="modal-content auth-box">
+            <a href="dashboard.html" class="auth-logo" style="text-decoration: none;">
+                <span class="brand-mark">MS</span>
+                <span class="brand-text">MSHome</span>
+            </a>
+            <h3>Verify Your Phone</h3>
+            <p class="modal-subtitle" id="otp-subtitle">Enter the 6-digit code we sent via SMS.</p>
+
+            <form id="otp-form">
+                <div class="otp-inputs" id="otp-inputs">
+                    <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" autocomplete="one-time-code" aria-label="Digit 1">
+                    <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" aria-label="Digit 2">
+                    <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" aria-label="Digit 3">
+                    <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" aria-label="Digit 4">
+                    <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" aria-label="Digit 5">
+                    <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" aria-label="Digit 6">
+                </div>
+
+                <p id="auth-message" class="auth-msg-text"></p>
+                <button type="submit" id="otp-submit-btn" class="primary-btn btn-on full-width-btn">Verify Code</button>
+
+                <p class="auth-toggle-wrapper">
+                    <span>Didn't get it?</span>
+                    <button type="button" id="otp-resend-btn" class="link-btn" disabled>Resend in 60s</button>
+                </p>
+                <p class="auth-toggle-wrapper">
+                    <a href="index.html">Back to login</a>
+                </p>
+            </form>
+        </div>
+    </div>
+    <script src="/js/main.js" defer></script>
+</body>
+
+</html>

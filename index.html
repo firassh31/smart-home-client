@@ -3,6 +3,23 @@
 
 <head>
     <meta charset="UTF-8">
+    <script>
+        // Device router: phones/tablets get the mobile app at /m, desktops stay here.
+        // Escape hatches: ?view=web forces the desktop UI, ?view=mobile forces /m.
+        (function () {
+            try {
+                var params = new URLSearchParams(location.search);
+                var view = params.get('view');
+                if (view === 'web') { localStorage.setItem('mshome-force-web', '1'); return; }
+                if (view === 'mobile') { localStorage.removeItem('mshome-force-web'); location.replace('/m/'); return; }
+                if (localStorage.getItem('mshome-force-web') === '1') return;
+                var isMobile = (navigator.userAgentData && navigator.userAgentData.mobile) ||
+                    /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+                    (/Mac/.test(navigator.userAgent) && navigator.maxTouchPoints > 1); // iPadOS reports as Mac
+                if (isMobile) location.replace('/m/');
+            } catch (e) { /* no redirect on error — desktop UI still works */ }
+        })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - MSHome</title>
     <link rel="stylesheet" href="/css/style.css">
